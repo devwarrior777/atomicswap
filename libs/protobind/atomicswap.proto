@@ -1,0 +1,227 @@
+syntax = "proto3";
+package protobind;
+
+enum ErrorType {
+	NO_ERROR = 0;
+	ERROR = 1
+	WIRE_ERROR = 2;
+}
+
+enum NetType {
+	MAINNET = 0;
+	TESTNET = 1;	
+}
+
+message InitiateRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string hostport = 5;
+	string rpcuser = 6;
+	string rpcpass = 7;
+
+	string part_address = 8;
+	uint64 amount = 9;		// "satoshis"
+
+	reserved 10 to 15;
+}
+
+message InitiateResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string secret = 5;
+	string contract = 6;
+	string contract_tx = 7;
+	uint64 fee = 8;
+	uint64 feerate = 9;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 10 to 12;
+}
+
+message ParticipateRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string hostport = 5;
+	string rpcuser = 6;
+	string rpcpass = 7;
+
+	string secrethash = 8;	
+	string part_address = 9;
+	uint64 amount = 10;		// "satoshis"
+
+	reserved 11 to 15;
+}
+
+message ParticipateResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string contract = 5;
+	string contract_tx = 6;
+	uint64 fee = 7;
+	uint64 feerate = 8;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 9 to 12;
+}
+
+message RedeemRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string hostport = 5;
+	string rpcuser = 6;
+	string rpcpass = 7;
+
+	string secret = 8;	
+	string contract = 9;
+	uint64 contract_tx = 10;
+
+	reserved 11 to 15;
+}
+
+message RedeemResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string redeem_tx = 5;
+	uint64 fee = 6;
+	uint64 feerate = 7;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 8 to 12;
+}
+
+message RefundRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string hostport = 5;
+	string rpcuser = 6;
+	string rpcpass = 7;
+
+	string contract = 8;
+	uint64 contract_tx = 9;
+
+	reserved 10 to 15;
+}
+
+message RefundResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string refund_tx = 5;
+	uint64 fee = 6;
+	uint64 feerate = 7;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 8 to 12;
+}
+
+message PublishRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string hostport = 5;
+	string rpcuser = 6;
+	string rpcpass = 7;
+
+	uint64 tx = 8;
+
+	reserved 9 to 15;
+}
+
+message PublishResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string txhash = 5;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 6 to 12;
+}
+
+message ExtractSecretRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string cp_redemption_tx = 5;
+	string secrethash = 6;
+
+	reserved 7 to 15;
+}
+
+message ExtractSecretResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string secret = 5;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 7 to 12;
+}
+
+message AuditRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string contract = 5;
+	uint64 contract_tx = 6;
+
+	reserved 7 to 15;
+}
+
+message AuditResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string secrethash = 5;
+	string contract_address = 6;
+	uint64 contract_value = 7;	// satoshis
+	string recipient_address = 8;
+	string refund_address = 9;
+	uint64 refund_locktime = 10;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 11 to 12;
+}
+
+

@@ -1,0 +1,14 @@
+vendor/
+.vscode
+.vscode/
+
+cmd/bchatomicswap/bchatomicswap
+cmd/btcatomicswap/btcatomicswap
+cmd/dcratomicswap/dcratomicswap
+cmd/ltcatomicswap/ltcatomicswap
+cmd/monaatomicswap/monaatomicswap
+cmd/partatomicswap/partatomicswap
+cmd/qtumatomicswap/qtumatomicswap
+cmd/viaatomicswap/viaatomicswap
+cmd/vtcatomicswap/vtcatomicswap
+cmd/xzcatomicswap/xzcatomicswap
