@@ -51,6 +51,35 @@ func stopRPC(client *rpc.Client) {
 // RPC funcs //
 ///////////////
 
+// getNewAddress calls the getnewaddress JSON-RPC method.  It is
+// implemented manually as the rpcclient implementation always passes the
+// account parameter which was removed in Bitcoin Core 0.15.
+func getNewAddress(testnet bool, rpcclient *rpc.Client) (xzcutil.Address, error) {
+	chainParams := getChainParams(testnet)
+	rawResp, err := rpcclient.RawRequest("getnewaddress", nil)
+	if err != nil {
+		return nil, err
+	}
+	var addrStr string
+	err = json.Unmarshal(rawResp, &addrStr)
+	if err != nil {
+		return nil, err
+	}
+	addr, err := xzcutil.DecodeAddress(addrStr, chainParams)
+	if err != nil {
+		return nil, err
+	}
+	if !addr.IsForNet(chainParams) {
+		return nil, fmt.Errorf("address %v is not intended for use on %v",
+			addrStr, chainParams.Name)
+	}
+	if _, ok := addr.(*xzcutil.AddressPubKeyHash); !ok {
+		return nil, fmt.Errorf("getnewaddress: address %v is not P2PKH",
+			addr)
+	}
+	return addr, nil
+}
+
 // getRawChangeAddress calls the getrawchangeaddress JSON-RPC method.  It is
 // implemented manually as the rpcclient implementation always passes the
 // account parameter which was removed in Bitcoin Core 0.15.

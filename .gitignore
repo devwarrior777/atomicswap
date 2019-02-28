@@ -1,7 +1,15 @@
+# For now .. consider storing in repo later
+go.mod
+go.sum
+
+# Probably redundant
 vendor/
+
+# Development
 .vscode
 .vscode/
 
+# Development binaries
 cmd/bchatomicswap/bchatomicswap
 cmd/btcatomicswap/btcatomicswap
 cmd/dcratomicswap/dcratomicswap

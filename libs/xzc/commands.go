@@ -1,5 +1,6 @@
 // Copyright (c) 2017 The Decred developers
 // Copyright (c) 2018 The Zcoin developers
+// Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
 
@@ -28,6 +29,11 @@ type RPCInfo struct {
 	User     string
 	Pass     string
 	HostPort string
+}
+
+// GetNewAddress gets a new address from the controlled wallet
+func GetNewAddress(testnet bool, rpcinfo RPCInfo) (xzcutil.Address, error) {
+	return newaddress(testnet, rpcinfo)
 }
 
 //InitiateParams is passed to the Initiate function

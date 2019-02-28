@@ -1,15 +1,46 @@
+
+// Copyright (c) 2018/2019 The DevCo developers
+// Use of this source code is governed by an ISC
+// license that can be found in the LICENSE file.
+
 syntax = "proto3";
 package protobind;
 
 enum ErrorType {
 	NO_ERROR = 0;
-	ERROR = 1
+	ERROR = 1;
 	WIRE_ERROR = 2;
 }
 
 enum NetType {
 	MAINNET = 0;
 	TESTNET = 1;	
+}
+
+message NewAddressRequest {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string hostport = 5;	// default localhost
+	string rpcuser = 6;
+	string rpcpass = 7;
+
+	reserved 8 to 15;
+}
+
+message NewAddressResponse {
+	string msgid = 1;
+	string coin = 2;
+	NetType net = 3;
+
+	string address = 5;
+
+	ErrorType error = 13;
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 6 to 12;
 }
 
 message InitiateRequest {
@@ -224,4 +255,5 @@ message AuditResponse {
 	reserved 11 to 12;
 }
 
+//TODO: Define service and implement golang side server so other bindings can access as client
 
