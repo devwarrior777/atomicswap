@@ -54,7 +54,12 @@ func stopRPC(client *rpc.Client) {
 // account parameter which was removed in Bitcoin Core 0.15.
 func getNewAddress(testnet bool, rpcclient *rpc.Client) (ltcutil.Address, error) {
 	chainParams := getChainParams(testnet)
-	rawResp, err := rpcclient.RawRequest("getnewaddress", nil)
+
+	param0 := []json.RawMessage{[]byte(`""`)} // Deprecated but necessary in this position
+	param1 := []json.RawMessage{[]byte(`"legacy"`)}
+	params := append(param0, param1...)
+	rawResp, err := rpcclient.RawRequest("getnewaddress", params)
+	//
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ const verify = true
 
 const secretSize = 32
 
-const txVersion = 2 // bitcoin 0.17 needs tx v2
+const txVersion = 2 // litecoin 0.16 needs tx v2
 
 // RPCInfo is RPC information passed into commands
 type RPCInfo struct {

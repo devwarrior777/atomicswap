@@ -191,6 +191,14 @@ func initiate(args []string) (bool, error) {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+	//dbg->
+	// var newAddr ltcutil.Address
+	// newAddr, err = ltc.GetNewAddress(*testnetFlag, rpcinfo)
+	// if err != nil {
+	// 	return showUsage, fmt.Errorf("Initiate: %v", err)
+	// }
+	// fmt.Printf("newAddr: %v\n", newAddr)
+	//<-dbg
 	var params ltc.InitiateParams
 	params.CP2AddrP2PKH = cp2AddrP2PKH
 	params.CP2Amount = amount
@@ -216,8 +224,8 @@ func initiate(args []string) (bool, error) {
 
 	fmt.Printf("Secret:      %x\n", result.Secret)
 	fmt.Printf("Secret hash: %x\n\n", result.SecretHash)
-	fmt.Printf("Contract fee: %v (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	fmt.Printf("Refund fee:   %v (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
+	fmt.Printf("Contract fee: %0.8f LTC (%0.8f LTC/kB)\n", result.ContractFee.ToBTC(), result.ContractFeePerKb)
+	fmt.Printf("Refund fee:   %0.8f LTC (%0.8f LTC/kB)\n\n", refundResult.RefundFee.ToBTC(), refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%v):\n", result.ContractP2SH)
 	fmt.Printf("%x\n\n", result.Contract)
 	var contractBuf bytes.Buffer
@@ -308,8 +316,8 @@ func participate(args []string) (bool, error) {
 	contractTxHash := result.ContractTx.TxHash()
 	refundTxHash := refundResult.RefundTx.TxHash()
 
-	fmt.Printf("Contract fee: %v (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	fmt.Printf("Refund fee:   %v (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
+	fmt.Printf("Contract fee: %0.8f LTC  (%0.8f LTC/kB)\n", result.ContractFee.ToBTC(), result.ContractFeePerKb)
+	fmt.Printf("Refund fee:   %0.8f LTC  (%0.8f LTC/kB)\n\n", refundResult.RefundFee.ToBTC(), refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%v):\n", result.ContractP2SH)
 	fmt.Printf("%x\n\n", result.Contract)
 	var contractBuf bytes.Buffer
@@ -384,7 +392,7 @@ func redeem(args []string) (bool, error) {
 	var buf bytes.Buffer
 	buf.Grow(redeemTx.SerializeSize())
 	redeemTx.Serialize(&buf)
-	fmt.Printf("Redeem fee: %v (%0.8f XZC/kB)\n\n", result.RedeemFee, result.RedeemFeePerKb)
+	fmt.Printf("Redeem fee: %0.8f LTC (%0.8f LTC/kB)\n\n", result.RedeemFee.ToBTC(), result.RedeemFeePerKb)
 	fmt.Printf("Redeem transaction (%v):\n", redeemTxHash)
 	fmt.Printf("%x\n\n", buf.Bytes())
 
@@ -442,7 +450,7 @@ func refund(args []string) (bool, error) {
 	var buf bytes.Buffer
 	buf.Grow(refundTx.SerializeSize())
 	refundTx.Serialize(&buf)
-	fmt.Printf("Refund fee: %v (%0.8f XZC/kB)\n\n", result.RefundFee, result.RefundFeePerKb)
+	fmt.Printf("Refund fee: %0.8f LTC (%0.8f LTC/kB)\n\n", result.RefundFee.ToBTC(), result.RefundFeePerKb)
 	fmt.Printf("Refund transaction (%v):\n", refundTxHash)
 	fmt.Printf("%x\n\n", buf.Bytes())
 
@@ -523,7 +531,7 @@ func auditContract(args []string) (bool, error) {
 	}
 
 	fmt.Printf("Contract address:        %v\n", result.ContractAddress.EncodeAddress())
-	fmt.Printf("Contract value:          %v\n", result.ContractAmount)
+	fmt.Printf("Contract value:          %0.8f LTC\n", result.ContractAmount.ToBTC())
 	fmt.Printf("Recipient address:       %v\n", result.ContractRecipientAddress.EncodeAddress())
 	fmt.Printf("Author's refund address: %v\n\n", result.ContractRefundAddress.EncodeAddress())
 
