@@ -176,82 +176,6 @@ func getFeePerKb(rpcclient *rpc.Client) (useFee, relayFee ltcutil.Amount, err er
 	return relayFee, relayFee, nil
 }
 
-// // getRawChangeAddress calls the getrawchangeaddress JSON-RPC method.  It is
-// // implemented manually as the rpcclient implementation always passes the
-// // account parameter which was removed in Bitcoin Core 0.15.
-// func getRawChangeAddress(testnet bool, rpcclient *rpc.Client) (ltcutil.Address, error) {
-// 	chainParams := getChainParams(testnet)
-// 	rawResp, err := rpcclient.RawRequest("getrawchangeaddress", nil)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	var addrStr string
-// 	err = json.Unmarshal(rawResp, &addrStr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	addr, err := ltcutil.DecodeAddress(addrStr, chainParams)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if !addr.IsForNet(chainParams) {
-// 		return nil, fmt.Errorf("address %v is not intended for use on %v",
-// 			addrStr, chainParams.Name)
-// 	}
-// 	if _, ok := addr.(*ltcutil.AddressPubKeyHash); !ok {
-// 		return nil, fmt.Errorf("getrawchangeaddress: address %v is not P2PKH",
-// 			addr)
-// 	}
-// 	return addr, nil
-// }
-
-// // getFeePerKb queries the wallet for the transaction relay fee/kB to use and
-// // the minimum mempool relay fee.  It first tries to get the user-set fee in the
-// // wallet.  If unset, it attempts to find an estimate using estimatesmartfee 6.
-// // If both of these fail, it falls back to mempool relay fee policy.
-// //
-// // For Litecoin this will always fall back until there is a statistically significant
-// // number of transactions per block
-// func getFeePerKb(rpcclient *rpc.Client) (useFee, relayFee ltcutil.Amount, err error) {
-// 	var estimateResp struct {
-// 		FeeRate float64 `json:"feerate"`
-// 	}
-// 	info, err := rpcclient.GetInfo()
-// 	if err != nil {
-// 		return 0, 0, fmt.Errorf("getinfo: %v", err)
-// 	}
-// 	relayFee, err = ltcutil.NewAmount(info.RelayFee)
-// 	if err != nil {
-// 		return 0, 0, err
-// 	}
-// 	maxFee := info.PaytxFee
-// 	if info.PaytxFee != 0 {
-// 		if info.RelayFee > maxFee {
-// 			maxFee = info.RelayFee
-// 		}
-// 		useFee, err = ltcutil.NewAmount(maxFee)
-// 		return useFee, relayFee, err
-// 	}
-
-// 	params := []json.RawMessage{[]byte("6")}
-// 	estimateRawResp, err := rpcclient.RawRequest("estimatesmartfee", params)
-// 	if err != nil {
-// 		return 0, 0, err
-// 	}
-// 	err = json.Unmarshal(estimateRawResp, &estimateResp)
-// 	if err == nil && estimateResp.FeeRate > 0 {
-// 		useFee, err = ltcutil.NewAmount(estimateResp.FeeRate)
-// 		if relayFee > useFee {
-// 			useFee = relayFee
-// 		}
-// 		return useFee, relayFee, err
-// 	}
-
-// 	fmt.Println("warning: falling back to mempool relay fee policy")
-// 	useFee, err = ltcutil.NewAmount(info.RelayFee)
-// 	return useFee, relayFee, err
-// }
-
 // fundRawTransaction calls the fundrawtransaction JSON-RPC method.  It is
 // implemented manually as client support is currently missing from the
 // ltcd/rpcclient package.
@@ -264,9 +188,11 @@ func fundRawTransaction(rpcclient *rpc.Client, tx *wire.MsgTx, feePerKb ltcutil.
 		return nil, 0, err
 	}
 	param1, err := json.Marshal(struct {
-		FeeRate float64 `json:"feeRate"`
+		ChangeType string  `json:"change_type"`
+		FeeRate    float64 `json:"feeRate"`
 	}{
-		FeeRate: feePerKb.ToBTC(),
+		ChangeType: "legacy",
+		FeeRate:    feePerKb.ToBTC(),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -319,77 +245,6 @@ func createSig(testnet bool, tx *wire.MsgTx, idx int, pkScript []byte, addr ltcu
 	return sig, wif.PrivKey.PubKey().SerializeCompressed(), nil
 }
 
-// // createSig creates and returns the serialized raw signature and compressed
-// // pubkey for a transaction input signature.  Due to limitations of the Litecoin
-// // Core RPC API, this requires dumping a private key and signing in the client,
-// // rather than letting the wallet sign.
-// func createSig(testnet bool, tx *wire.MsgTx, idx int, pkScript []byte, addr ltcutil.Address,
-// 	rpcclient *rpc.Client) (sig, pubkey []byte, err error) {
-
-// 	wif, err := dpk(testnet, rpcclient, addr)
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-// 	sig, err = txscript.RawTxInSignature(tx, idx, pkScript, txscript.SigHashAll, wif.PrivKey)
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-// 	return sig, wif.PrivKey.PubKey().SerializeCompressed(), nil
-// }
-
-// func dpk(testnet bool, rpcclient *rpc.Client, addr ltcutil.Address) (wif *ltcutil.WIF, err error) {
-// 	chainParams := getChainParams(testnet)
-// 	addrStr := addr.EncodeAddress()
-// 	if !addr.IsForNet(chainParams) {
-// 		return nil, fmt.Errorf("address %v is not intended for use on %v",
-// 			addrStr, chainParams.Name)
-// 	}
-// 	param0, err := json.Marshal(addrStr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	params := []json.RawMessage{param0}
-// 	// This should always fail the first time as Litecoin added a one-time authoriz-
-// 	// ation key returned in error string. Along with a warning. The idea is that
-// 	// inexperienced people are warned if scammers propose they use `dumpprivkey'
-// 	_, err = rpcclient.RawRequest("dumpprivkey", params)
-// 	if err == nil {
-// 		unexpected := errors.New("dpk: No authorization challenge")
-// 		return nil, unexpected
-// 	}
-
-// 	errStr := err.Error()
-// 	searchStr := "authorization code is: "
-// 	i0 := strings.Index(errStr, searchStr)
-// 	if i0 == -1 {
-// 		return nil, err
-// 	}
-// 	i := i0 + len(searchStr)
-// 	authStr := errStr[i : i+4]
-// 	//
-// 	param1, err := json.Marshal(authStr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	params2 := []json.RawMessage{param0, param1}
-// 	rawResp2, err := rpcclient.RawRequest("dumpprivkey", params2)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	var sk string
-// 	err = json.Unmarshal(rawResp2, &sk)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	w, err := ltcutil.DecodeWIF(sk)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return w, nil
-// }
-
 func sendRawTransaction(testnet bool, rpcclient *rpc.Client, tx *wire.MsgTx) (*chainhash.Hash, error) {
 	txHash, err := rpcclient.SendRawTransaction(tx, false)
 	if err != nil {
@@ -397,7 +252,3 @@ func sendRawTransaction(testnet bool, rpcclient *rpc.Client, tx *wire.MsgTx) (*c
 	}
 	return txHash, nil
 }
-
-// func signRawTransaction(rpcclient *rpc.Client, tx *wire.MsgTx) {
-// 	return
-// }
