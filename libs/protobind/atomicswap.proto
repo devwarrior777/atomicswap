@@ -11,6 +11,29 @@ enum NetType {
 	TESTNET = 1;	
 }
 
+message PingWalletRpcRequest {
+	string coin = 1;
+	NetType net = 2;
+
+	string hostport = 5;	// default localhost
+	string rpcuser = 6;
+	string rpcpass = 7;
+
+	reserved 8 to 15;
+}
+
+message PingWalletRpcResponse {
+	string coin = 1;
+	NetType net = 2;
+
+	string address = 5;
+
+	int32 errorno = 14;
+	string errstr = 15;
+
+	reserved 6 to 13;
+}
+
 message NewAddressRequest {
 	string coin = 1;
 	NetType net = 2;
