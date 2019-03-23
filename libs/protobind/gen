@@ -1,0 +1,3 @@
+cd ~/code/go/devwarrior777/atomicswap/libs/protobind
+protoc --go_out=plugins=grpc:. atomicswap.proto
+

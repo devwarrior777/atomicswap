@@ -6,21 +6,14 @@
 syntax = "proto3";
 package protobind;
 
-enum ErrorType {
-	NO_ERROR = 0;
-	ERROR = 1;
-	WIRE_ERROR = 2;
-}
-
 enum NetType {
 	MAINNET = 0;
 	TESTNET = 1;	
 }
 
 message NewAddressRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string hostport = 5;	// default localhost
 	string rpcuser = 6;
@@ -30,23 +23,20 @@ message NewAddressRequest {
 }
 
 message NewAddressResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string address = 5;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 6 to 12;
+	reserved 6 to 13;
 }
 
 message InitiateRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
@@ -59,9 +49,8 @@ message InitiateRequest {
 }
 
 message InitiateResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string secret = 5;
 	string contract = 6;
@@ -69,17 +58,15 @@ message InitiateResponse {
 	uint64 fee = 8;
 	uint64 feerate = 9;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 10 to 12;
+	reserved 10 to 13;
 }
 
 message ParticipateRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
@@ -93,26 +80,23 @@ message ParticipateRequest {
 }
 
 message ParticipateResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string contract = 5;
 	string contract_tx = 6;
 	uint64 fee = 7;
 	uint64 feerate = 8;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 9 to 12;
+	reserved 9 to 13;
 }
 
 message RedeemRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
@@ -126,25 +110,22 @@ message RedeemRequest {
 }
 
 message RedeemResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string redeem_tx = 5;
 	uint64 fee = 6;
 	uint64 feerate = 7;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 8 to 12;
+	reserved 8 to 13;
 }
 
 message RefundRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
@@ -157,25 +138,22 @@ message RefundRequest {
 }
 
 message RefundResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string refund_tx = 5;
 	uint64 fee = 6;
 	uint64 feerate = 7;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 8 to 12;
+	reserved 8 to 13;
 }
 
 message PublishRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
@@ -187,23 +165,20 @@ message PublishRequest {
 }
 
 message PublishResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string txhash = 5;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 6 to 12;
+	reserved 6 to 13;
 }
 
 message ExtractSecretRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string cp_redemption_tx = 5;
 	string secrethash = 6;
@@ -212,23 +187,20 @@ message ExtractSecretRequest {
 }
 
 message ExtractSecretResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string secret = 5;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 7 to 12;
+	reserved 7 to 13;
 }
 
 message AuditRequest {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string contract = 5;
 	uint64 contract_tx = 6;
@@ -237,9 +209,8 @@ message AuditRequest {
 }
 
 message AuditResponse {
-	string msgid = 1;
-	string coin = 2;
-	NetType net = 3;
+	string coin = 1;
+	NetType net = 2;
 
 	string secrethash = 5;
 	string contract_address = 6;
@@ -248,11 +219,10 @@ message AuditResponse {
 	string refund_address = 9;
 	uint64 refund_locktime = 10;
 
-	ErrorType error = 13;
 	int32 errorno = 14;
 	string errstr = 15;
 
-	reserved 11 to 12;
+	reserved 11 to 13;
 }
 
 //TODO: Define service and implement golang side server so other bindings can access as client
