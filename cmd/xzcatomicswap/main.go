@@ -110,8 +110,8 @@ func run() error {
 	case "auditcontract":
 		cmdArgs = 2
 	default:
-		return fmt.Errorf("unknown command %v", args[0])
 		flagset.Usage()
+		return fmt.Errorf("unknown command %v", args[0])
 	}
 	nArgs := checkCmdArgLength(args[1:], cmdArgs)
 	flagset.Parse(args[1+nArgs:])
@@ -229,6 +229,12 @@ func participate(args []string) error {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+
+	err = xzc.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
 	var params xzc.ParticipateParams
 	params.SecretHash = args[3]
 	params.CP1Addr = args[1]
@@ -281,13 +287,18 @@ func redeem(args []string) error {
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
 
+	err := xzc.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
 	var params xzc.RedeemParams
 	params.Contract = args[1]
 	params.ContractTx = args[2]
 	params.Secret = args[3]
 
 	var result xzc.RedeemResult
-	result, err := xzc.Redeem(*testnetFlag, rpcinfo, params)
+	result, err = xzc.Redeem(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Redeem: %v", err)
 	}
@@ -317,12 +328,17 @@ func refund(args []string) error {
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
 
+	err := xzc.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
 	var params xzc.RefundParams
 	params.Contract = args[1]
 	params.ContractTx = args[2]
 
 	var result xzc.RefundResult
-	result, err := xzc.Refund(*testnetFlag, rpcinfo, params)
+	result, err = xzc.Refund(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Refund: %v", err)
 	}

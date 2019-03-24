@@ -1,5 +1,3 @@
-// Copyright (c) 2017/2019 The Decred developers
-// Copyright (c) 2018/2019 The Zcoin developers
 // Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -131,12 +129,6 @@ type AuditParams struct {
 
 // AuditResult is returned from Audit command
 type AuditResult struct {
-	// ContractAmount           xzcutil.Amount
-	// ContractAddress          xzcutil.AddressScriptHash
-	// ContractSecretHash       []byte
-	// ContractRecipientAddress xzcutil.AddressPubKeyHash
-	// ContractRefundAddress    xzcutil.AddressPubKeyHash
-	// ContractRefundLocktime   int64
 	ContractAmount           int64
 	ContractAddress          string
 	ContractSecretHash       string
