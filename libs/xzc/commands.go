@@ -38,18 +38,19 @@ func GetNewAddress(testnet bool, rpcinfo RPCInfo) (xzcutil.Address, error) {
 
 //InitiateParams is passed to the Initiate function
 type InitiateParams struct {
-	CP2AddrP2PKH *xzcutil.AddressPubKeyHash
-	CP2Amount    xzcutil.Amount
+	CP2Addr   string
+	CP2Amount int64
 }
 
 //InitiateResult is returned from the Initiate function
 type InitiateResult struct {
-	Secret           []byte
-	SecretHash       []byte
-	Contract         []byte
-	ContractP2SH     xzcutil.Address
-	ContractTx       wire.MsgTx
-	ContractFee      xzcutil.Amount
+	Secret           string
+	SecretHash       string
+	Contract         string
+	ContractP2SH     string
+	ContractTx       string
+	ContractTxHash   string
+	ContractFee      int64
 	ContractFeePerKb float64
 }
 
@@ -60,17 +61,18 @@ func Initiate(testnet bool, rpcinfo RPCInfo, params InitiateParams) (InitiateRes
 
 //ParticipateParams is passed to the Participate command
 type ParticipateParams struct {
-	SecretHash   []byte
-	CP1AddrP2PKH *xzcutil.AddressPubKeyHash
-	CP1Amount    xzcutil.Amount
+	SecretHash string
+	CP1Addr    string
+	CP1Amount  int64
 }
 
 //ParticipateResult is returned from the Participate command
 type ParticipateResult struct {
-	Contract         []byte
-	ContractP2SH     xzcutil.Address
-	ContractTx       wire.MsgTx
-	ContractFee      xzcutil.Amount
+	Contract         string
+	ContractP2SH     string
+	ContractTx       string
+	ContractTxHash   string
+	ContractFee      int64
 	ContractFeePerKb float64
 }
 
@@ -81,15 +83,16 @@ func Participate(testnet bool, rpcinfo RPCInfo, params ParticipateParams) (Parti
 
 // RedeemParams is passed to the Redeem command
 type RedeemParams struct {
-	Secret     []byte
-	Contract   []byte
-	ContractTx *wire.MsgTx
+	Secret     string
+	Contract   string
+	ContractTx string
 }
 
 // RedeemResult is returned from the Redeem command
 type RedeemResult struct {
-	RedeemTx       wire.MsgTx
-	RedeemFee      xzcutil.Amount
+	RedeemTx       string
+	RedeemTxHash   string
+	RedeemFee      int64
 	RedeemFeePerKb float64
 }
 
@@ -100,14 +103,15 @@ func Redeem(testnet bool, rpcinfo RPCInfo, params RedeemParams) (RedeemResult, e
 
 // RefundParams is passed to Refund command
 type RefundParams struct {
-	Contract   []byte
-	ContractTx *wire.MsgTx
+	Contract   string
+	ContractTx string
 }
 
 // RefundResult is returned from Refund command
 type RefundResult struct {
-	RefundTx       wire.MsgTx
-	RefundFee      xzcutil.Amount
+	RefundTx       string
+	RefundTxHash   string
+	RefundFee      int64
 	RefundFeePerKb float64
 }
 

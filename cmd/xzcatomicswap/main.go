@@ -22,7 +22,6 @@ import (
 	"github.com/zcoinofficial/xzcd/chaincfg"
 	"github.com/zcoinofficial/xzcd/txscript"
 	"github.com/zcoinofficial/xzcd/wire"
-	xzcutil "github.com/zcoinofficial/xzcutil"
 )
 
 var (
@@ -77,14 +76,11 @@ func init() {
 }
 
 func main() {
-	showUsage, err := run()
+	err := run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
-	if showUsage {
-		flagset.Usage()
-	}
-	if err != nil || showUsage {
+	if err != nil {
 		os.Exit(1)
 	}
 }
@@ -101,11 +97,12 @@ func checkCmdArgLength(args []string, required int) (nArgs int) {
 	return required
 }
 
-func run() (showUsage bool, err error) {
+func run() error {
 	flagset.Parse(os.Args[1:])
 	args := flagset.Args()
 	if len(args) == 0 {
-		return true, nil
+		flagset.Usage()
+		return errors.New("no args")
 	}
 	cmdArgs := 0
 	switch args[0] {
@@ -122,20 +119,23 @@ func run() (showUsage bool, err error) {
 	case "auditcontract":
 		cmdArgs = 2
 	default:
-		return true, fmt.Errorf("unknown command %v", args[0])
+		return fmt.Errorf("unknown command %v", args[0])
+		flagset.Usage()
 	}
 	nArgs := checkCmdArgLength(args[1:], cmdArgs)
 	flagset.Parse(args[1+nArgs:])
 	if nArgs < cmdArgs {
-		return true, fmt.Errorf("%s: too few arguments", args[0])
+		flagset.Usage()
+		return fmt.Errorf("%s: too few arguments", args[0])
 	}
 	if flagset.NArg() != 0 {
-		return true, fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
+		flagset.Usage()
+		return fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
 	}
 
-	if *testnetFlag {
-		chainParams = &chaincfg.TestNet3Params
-	}
+	// if *testnetFlag {
+	// 	chainParams = &chaincfg.TestNet3Params
+	// }
 
 	switch args[0] {
 	case "initiate":
@@ -156,35 +156,19 @@ func run() (showUsage bool, err error) {
 	case "auditcontract":
 		return auditContract(args)
 	}
-
-	return true, fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
+	flagset.Usage()
+	return fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
 }
 
-func initiate(args []string) (bool, error) {
-	showUsage := true
-	cp2Addr, err := xzcutil.DecodeAddress(args[1], chainParams)
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode participant address: %v", err)
-	}
-	if !cp2Addr.IsForNet(chainParams) {
-		return showUsage, fmt.Errorf("participant address is not "+
-			"intended for use on %v", chainParams.Name)
-	}
-	cp2AddrP2PKH, ok := cp2Addr.(*xzcutil.AddressPubKeyHash)
-	if !ok {
-		return showUsage, errors.New("participant address is not P2PKH")
-	}
-
+func initiate(args []string) error {
 	amountF64, err := strconv.ParseFloat(args[2], 64)
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode amount: %v", err)
+		return fmt.Errorf("failed to decode amount: %v", err)
 	}
 
-	showUsage = false
-
-	amount, err := xzcutil.NewAmount(amountF64)
+	amount, err := xzc.NewAmount(amountF64)
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 
 	var rpcinfo xzc.RPCInfo
@@ -192,325 +176,227 @@ func initiate(args []string) (bool, error) {
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
 	var params xzc.InitiateParams
-	params.CP2AddrP2PKH = cp2AddrP2PKH
-	params.CP2Amount = amount
+	params.CP2Addr = args[1]
+	params.CP2Amount = int64(amount)
 
 	var result xzc.InitiateResult
 	result, err = xzc.Initiate(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Initiate: %v", err)
+		return fmt.Errorf("Initiate: %v", err)
 	}
 
 	var refundParams xzc.RefundParams
 	refundParams.Contract = result.Contract
-	refundParams.ContractTx = &result.ContractTx
+	refundParams.ContractTx = result.ContractTx
 
 	var refundResult xzc.RefundResult
 	refundResult, err = xzc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
-		return showUsage, fmt.Errorf("Initiate: %v", err)
+		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	contractTxHash := result.ContractTx.TxHash()
-	refundTxHash := refundResult.RefundTx.TxHash()
-
-	fmt.Printf("Secret:      %x\n", result.Secret)
-	fmt.Printf("Secret hash: %x\n\n", result.SecretHash)
-	fmt.Printf("Contract fee: %v (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
+	fmt.Printf("Secret:      %s\n", result.Secret)
+	fmt.Printf("Secret hash: %s\n\n", result.SecretHash)
+	fmt.Printf("Contract fee: %d (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
 	fmt.Printf("Refund fee:   %v (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
-	fmt.Printf("Contract (%v):\n", result.ContractP2SH)
-	fmt.Printf("%x\n\n", result.Contract)
-	var contractBuf bytes.Buffer
-	contractBuf.Grow(result.ContractTx.SerializeSize())
-	result.ContractTx.Serialize(&contractBuf)
-	fmt.Printf("Contract transaction (%v):\n", contractTxHash)
-	fmt.Printf("%x\n\n", contractBuf.Bytes())
-	var refundBuf bytes.Buffer
-	refundBuf.Grow(refundResult.RefundTx.SerializeSize())
-	refundResult.RefundTx.Serialize(&refundBuf)
-	fmt.Printf("Refund transaction (%v):\n", &refundTxHash)
-	fmt.Printf("%x\n\n", refundBuf.Bytes())
+	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
+	fmt.Printf("%s\n\n", result.Contract)
+	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
+	fmt.Printf("%s\n\n", result.ContractTx)
+
+	fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
+	fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &result.ContractTx)
-		if err != nil {
-			return showUsage, err
-		}
-		fmt.Printf("Published %s transaction (%v)\n", "contract", txHash)
+		// txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &result.ContractTx)
+		// if err != nil {
+		// 	return err
+		// }
+		// fmt.Printf("Published %s transaction (%v)\n", "contract", txHash)
 	}
 
-	return showUsage, nil
+	return nil
 }
 
-func participate(args []string) (bool, error) {
-	showUsage := true
-	cp1Addr, err := xzcutil.DecodeAddress(args[1], chainParams)
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode initiator address: %v", err)
-	}
-	if !cp1Addr.IsForNet(chainParams) {
-		return showUsage, fmt.Errorf("initiator address is not "+
-			"intended for use on %v", chainParams.Name)
-	}
-	cp1AddrP2PKH, ok := cp1Addr.(*xzcutil.AddressPubKeyHash)
-	if !ok {
-		return showUsage, errors.New("initiator address is not P2PKH")
-	}
-
+func participate(args []string) error {
 	amountF64, err := strconv.ParseFloat(args[2], 64)
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode amount: %v", err)
+		return fmt.Errorf("failed to decode amount: %v", err)
 	}
-	amount, err := xzcutil.NewAmount(amountF64)
+	amount, err := xzc.NewAmount(amountF64)
 	if err != nil {
-		return showUsage, err
+		return err
 	}
-
-	secretHash, err := hex.DecodeString(args[3])
-	if err != nil {
-		return showUsage, errors.New("secret hash must be hex encoded")
-	}
-	if len(secretHash) != sha256.Size {
-		return showUsage, errors.New("secret hash has wrong size")
-	}
-
-	showUsage = false
 
 	var rpcinfo xzc.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
 	var params xzc.ParticipateParams
-	params.SecretHash = secretHash
-	params.CP1AddrP2PKH = cp1AddrP2PKH
-	params.CP1Amount = amount
+	params.SecretHash = args[3]
+	params.CP1Addr = args[1]
+	params.CP1Amount = int64(amount)
 
 	var result xzc.ParticipateResult
 	result, err = xzc.Participate(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Participate: %v", err)
+		return fmt.Errorf("Participate: %v", err)
 	}
 
 	var refundParams xzc.RefundParams
 	refundParams.Contract = result.Contract
-	refundParams.ContractTx = &result.ContractTx
+	refundParams.ContractTx = result.ContractTx
 
 	var refundResult xzc.RefundResult
 	refundResult, err = xzc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
-		return showUsage, fmt.Errorf("Refund: %v", err)
+		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	contractTxHash := result.ContractTx.TxHash()
-	refundTxHash := refundResult.RefundTx.TxHash()
+	fmt.Printf("Contract fee: %d (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
+	fmt.Printf("Refund fee:   %d (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
+	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
+	fmt.Printf("%s\n\n", result.Contract)
+	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
+	fmt.Printf("%s\n\n", result.ContractTx)
 
-	fmt.Printf("Contract fee: %v (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	fmt.Printf("Refund fee:   %v (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
-	fmt.Printf("Contract (%v):\n", result.ContractP2SH)
-	fmt.Printf("%x\n\n", result.Contract)
-	var contractBuf bytes.Buffer
-	contractBuf.Grow(result.ContractTx.SerializeSize())
-	result.ContractTx.Serialize(&contractBuf)
-	fmt.Printf("Contract transaction (%v):\n", contractTxHash)
-	fmt.Printf("%x\n\n", contractBuf.Bytes())
-
-	var refundBuf bytes.Buffer
-	refundBuf.Grow(refundResult.RefundTx.SerializeSize())
-	refundResult.RefundTx.Serialize(&refundBuf)
-	fmt.Printf("Refund transaction (%v):\n", &refundTxHash)
-	fmt.Printf("%x\n\n", refundBuf.Bytes())
+	fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
+	fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &result.ContractTx)
-		if err != nil {
-			return showUsage, err
-		}
-		fmt.Printf("Published %s transaction (%v)\n", "contract", txHash)
+		// txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &result.ContractTx)
+		// if err != nil {
+		// 	return err
+		// }
+		// fmt.Printf("Published %s transaction (%v)\n", "contract", txHash)
 	}
 
-	return showUsage, nil
+	return nil
 }
 
-func redeem(args []string) (bool, error) {
-	showUsage := true
-	contract, err := hex.DecodeString(args[1])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract: %v", err)
-	}
-
-	contractTxBytes, err := hex.DecodeString(args[2])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-	var contractTx wire.MsgTx
-	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-
-	secret, err := hex.DecodeString(args[3])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode secret: %v", err)
-	}
-
-	showUsage = false
-
+func redeem(args []string) error {
 	var rpcinfo xzc.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+
 	var params xzc.RedeemParams
-	params.Secret = secret
-	params.Contract = contract
-	params.ContractTx = &contractTx
+	params.Contract = args[1]
+	params.ContractTx = args[2]
+	params.Secret = args[3]
 
 	var result xzc.RedeemResult
-	result, err = xzc.Redeem(*testnetFlag, rpcinfo, params)
+	result, err := xzc.Redeem(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Redeem: %v", err)
+		return fmt.Errorf("Redeem: %v", err)
 	}
 
-	redeemTx := result.RedeemTx
-	redeemTxHash := redeemTx.TxHash()
-
-	var buf bytes.Buffer
-	buf.Grow(redeemTx.SerializeSize())
-	redeemTx.Serialize(&buf)
-	fmt.Printf("Redeem fee: %v (%0.8f XZC/kB)\n\n", result.RedeemFee, result.RedeemFeePerKb)
-	fmt.Printf("Redeem transaction (%v):\n", redeemTxHash)
-	fmt.Printf("%x\n\n", buf.Bytes())
+	fmt.Printf("Redeem fee:   %d (%0.8f XZC/kB)\n\n", result.RedeemFee, result.RedeemFeePerKb)
+	fmt.Printf("Redeem transaction (%s):\n", result.RedeemTxHash)
+	fmt.Printf("%s\n\n", result.RedeemTx)
 
 	doPublish, err := askPublishTx("redeem")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &redeemTx)
-		if err != nil {
-			return false, err
-		}
-		fmt.Printf("Published %s transaction (%v)\n", "redeem", txHash)
+		// txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &redeemTx)
+		// if err != nil {
+		// 	return err
+		// }
+		// fmt.Printf("Published %s transaction (%v)\n", "redeem", txHash)
 	}
 
-	return false, nil
+	return nil
 }
 
-func refund(args []string) (bool, error) {
-	showUsage := true
-	contract, err := hex.DecodeString(args[1])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract: %v", err)
-	}
-
-	contractTxBytes, err := hex.DecodeString(args[2])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-	var contractTx wire.MsgTx
-	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-
-	showUsage = false
-
+func refund(args []string) error {
 	var rpcinfo xzc.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+
 	var params xzc.RefundParams
-	params.Contract = contract
-	params.ContractTx = &contractTx
+	params.Contract = args[1]
+	params.ContractTx = args[2]
 
 	var result xzc.RefundResult
-	result, err = xzc.Refund(*testnetFlag, rpcinfo, params)
+	result, err := xzc.Refund(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Refund: %v", err)
+		return fmt.Errorf("Refund: %v", err)
 	}
 
-	refundTx := result.RefundTx
-	refundTxHash := refundTx.TxHash()
-
-	var buf bytes.Buffer
-	buf.Grow(refundTx.SerializeSize())
-	refundTx.Serialize(&buf)
-	fmt.Printf("Refund fee: %v (%0.8f XZC/kB)\n\n", result.RefundFee, result.RefundFeePerKb)
-	fmt.Printf("Refund transaction (%v):\n", refundTxHash)
-	fmt.Printf("%x\n\n", buf.Bytes())
+	fmt.Printf("Refund fee: %d (%0.8f XZC/kB)\n\n", result.RefundFee, result.RefundFeePerKb)
+	fmt.Printf("Refund transaction (%s):\n", result.RefundTxHash)
+	fmt.Printf("%s\n\n", result.RefundTx)
 
 	doPublish, err := askPublishTx("refund")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &refundTx)
-		if err != nil {
-			return showUsage, err
-		}
-		fmt.Printf("Published %s transaction (%v)\n", "refund", txHash)
+		// txHash, err := xzc.Publish(*testnetFlag, rpcinfo, &refundTx)
+		// if err != nil {
+		// 	return err
+		// }
+		// fmt.Printf("Published %s transaction (%v)\n", "refund", txHash)
 	}
 
-	return showUsage, nil
+	return nil
 }
 
-func extractSecret(args []string) (bool, error) {
-	showUsage := true
+func extractSecret(args []string) error {
 	redemptionTxBytes, err := hex.DecodeString(args[1])
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode redemption transaction: %v", err)
+		return fmt.Errorf("failed to decode redemption transaction: %v", err)
 	}
 	var redemptionTx wire.MsgTx
 	err = redemptionTx.Deserialize(bytes.NewReader(redemptionTxBytes))
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode redemption transaction: %v", err)
+		return fmt.Errorf("failed to decode redemption transaction: %v", err)
 	}
 
 	secretHash, err := hex.DecodeString(args[2])
 	if err != nil {
-		return showUsage, errors.New("secret hash must be hex encoded")
+		return errors.New("secret hash must be hex encoded")
 	}
 	if len(secretHash) != sha256.Size {
-		return showUsage, errors.New("secret hash has wrong size")
+		return errors.New("secret hash has wrong size")
 	}
-
-	showUsage = false
 
 	secret, err := xzc.ExtractSecret(&redemptionTx, secretHash)
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 
 	fmt.Printf("Contract shared secret: %x\n", secret)
 
-	return showUsage, nil
+	return nil
 }
 
-func auditContract(args []string) (bool, error) {
-	showUsage := true
+func auditContract(args []string) error {
 	contract, err := hex.DecodeString(args[1])
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract: %v", err)
+		return fmt.Errorf("failed to decode contract: %v", err)
 	}
 
 	contractTxBytes, err := hex.DecodeString(args[2])
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
 	var contractTx wire.MsgTx
 	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
-
-	showUsage = false
 
 	var params xzc.AuditParams
 	params.Contract = contract
@@ -519,7 +405,7 @@ func auditContract(args []string) (bool, error) {
 	var result xzc.AuditResult
 	result, err = xzc.AuditContract(*testnetFlag, params)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	fmt.Printf("Contract address:        %v\n", result.ContractAddress.EncodeAddress())
@@ -543,7 +429,7 @@ func auditContract(args []string) (bool, error) {
 		fmt.Printf("Locktime: block %v\n", locktime)
 	}
 
-	return false, nil
+	return nil
 }
 
 func askPublishTx(name string) (bool, error) {
