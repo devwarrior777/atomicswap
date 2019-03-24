@@ -11,8 +11,6 @@ package xzc
 /////////////////////////////////////////////////////////////////////
 
 import (
-	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
-	"github.com/zcoinofficial/xzcd/wire"
 	xzcutil "github.com/zcoinofficial/xzcutil"
 )
 
@@ -29,6 +27,11 @@ type RPCInfo struct {
 	User     string
 	Pass     string
 	HostPort string
+}
+
+// PingRPC tests if wallet node RPC is available
+func PingRPC(testnet bool, rpcinfo RPCInfo) error {
+	return pingrpc(testnet, rpcinfo)
 }
 
 // GetNewAddress gets a new address from the controlled wallet
@@ -122,17 +125,23 @@ func Refund(testnet bool, rpcinfo RPCInfo, params RefundParams) (RefundResult, e
 
 // AuditParams is passed to Audit command
 type AuditParams struct {
-	Contract   []byte
-	ContractTx *wire.MsgTx
+	Contract   string
+	ContractTx string
 }
 
 // AuditResult is returned from Audit command
 type AuditResult struct {
-	ContractAmount           xzcutil.Amount
-	ContractAddress          xzcutil.AddressScriptHash
-	ContractSecretHash       []byte
-	ContractRecipientAddress xzcutil.AddressPubKeyHash
-	ContractRefundAddress    xzcutil.AddressPubKeyHash
+	// ContractAmount           xzcutil.Amount
+	// ContractAddress          xzcutil.AddressScriptHash
+	// ContractSecretHash       []byte
+	// ContractRecipientAddress xzcutil.AddressPubKeyHash
+	// ContractRefundAddress    xzcutil.AddressPubKeyHash
+	// ContractRefundLocktime   int64
+	ContractAmount           int64
+	ContractAddress          string
+	ContractSecretHash       string
+	ContractRecipientAddress string
+	ContractRefundAddress    string
 	ContractRefundLocktime   int64
 }
 
@@ -142,16 +151,16 @@ func AuditContract(testnet bool, params AuditParams) (AuditResult, error) {
 }
 
 // Publish command broadcasts a raw hex transaction
-func Publish(testnet bool, rpcinfo RPCInfo, tx *wire.MsgTx) (*chainhash.Hash, error) {
+func Publish(testnet bool, rpcinfo RPCInfo, tx string) (string, error) {
 	txhash, err := publish(testnet, rpcinfo, tx)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return txhash, nil
 }
 
 // ExtractSecret returns a secret from the scriptSig of a transaction redeeming a contract
-func ExtractSecret(redemptionTx *wire.MsgTx, secretHash []byte) ([]byte, error) {
+func ExtractSecret(redemptionTx string, secretHash string) (string, error) {
 	return extractSecret(redemptionTx, secretHash)
 }
 

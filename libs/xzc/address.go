@@ -10,7 +10,7 @@ import (
 	xzcutil "github.com/zcoinofficial/xzcutil"
 )
 
-// getNewAddress gets a new wallet address from the controlled wallet
+// newaddress gets a new wallet address from the controlled wallet
 func newaddress(testnet bool, rpcinfo RPCInfo) (xzcutil.Address, error) {
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {

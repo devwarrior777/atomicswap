@@ -52,6 +52,21 @@ func stopRPC(client *rpc.Client) {
 // RPC funcs //
 ///////////////
 
+// getBlockCount calls the getblockcount JSON-RPC method. It is
+// currently used as a simple 'ping' to discover if node RPC is available
+func getBlockCount(testnet bool, rpcclient *rpc.Client) (int, error) {
+	rawResp, err := rpcclient.RawRequest("getblockcount", nil)
+	if err != nil {
+		return -1, err
+	}
+	var blockCount int
+	err = json.Unmarshal(rawResp, &blockCount)
+	if err != nil {
+		return -1, err
+	}
+	return blockCount, nil
+}
+
 // getNewAddress calls the getnewaddress JSON-RPC method.  It is
 // implemented manually as the rpcclient implementation always passes the
 // account parameter which was removed in Bitcoin Core 0.15.
@@ -284,7 +299,3 @@ func sendRawTransaction(testnet bool, rpcclient *rpc.Client, tx *wire.MsgTx) (*c
 	}
 	return txHash, nil
 }
-
-// func signRawTransaction(rpcclient *rpc.Client, tx *wire.MsgTx) {
-// 	return
-// }

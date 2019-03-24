@@ -7,25 +7,39 @@
 package xzc
 
 import (
-	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
+	"bytes"
+	"encoding/hex"
+	"fmt"
+
 	"github.com/zcoinofficial/xzcd/wire"
 )
 
 // Publish (broadcast) transaction to the network.
-func publish(testnet bool, rpcinfo RPCInfo, tx *wire.MsgTx) (*chainhash.Hash, error) {
+func publish(testnet bool, rpcinfo RPCInfo, tx string) (string, error) {
+	txBytes, err := hex.DecodeString(tx)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode broadcast transaction bytes: %v", err)
+	}
+
+	var broadcastTx wire.MsgTx
+	err = broadcastTx.Deserialize(bytes.NewReader(txBytes))
+	if err != nil {
+		return "", fmt.Errorf("failed to decode broadcast transaction: %v", err)
+	}
+
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer func() {
 		rpcclient.Shutdown()
 		rpcclient.WaitForShutdown()
 	}()
 
-	txHash, err := sendRawTransaction(testnet, rpcclient, tx)
+	txHash, err := sendRawTransaction(testnet, rpcclient, &broadcastTx)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return txHash, nil
+	return txHash.String(), nil
 }

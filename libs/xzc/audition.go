@@ -8,10 +8,12 @@ package xzc
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
 	"github.com/zcoinofficial/xzcd/txscript"
+	"github.com/zcoinofficial/xzcd/wire"
 	xzcutil "github.com/zcoinofficial/xzcutil"
 )
 
@@ -21,8 +23,21 @@ func auditContract(testnet bool, params AuditParams) (AuditResult, error) {
 
 	chainParams := getChainParams(testnet)
 
-	contract := params.Contract
-	contractTx := params.ContractTx
+	contract, err := hex.DecodeString(params.Contract)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract: %v", err)
+	}
+
+	contractTxBytes, err := hex.DecodeString(params.ContractTx)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
+
+	var contractTx wire.MsgTx
+	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
 
 	contractHash160 := xzcutil.Hash160(contract)
 	contractOut := -1
@@ -66,12 +81,12 @@ func auditContract(testnet bool, params AuditParams) (AuditResult, error) {
 		return result, err
 	}
 
-	result.ContractAddress = *contractAddr
-	result.ContractAmount = xzcutil.Amount(contractTx.TxOut[contractOut].Value)
-	result.ContractRecipientAddress = *recipientAddr
-	result.ContractRefundAddress = *refundAddr
+	result.ContractAddress = contractAddr.EncodeAddress()
+	result.ContractAmount = contractTx.TxOut[contractOut].Value
+	result.ContractRecipientAddress = recipientAddr.EncodeAddress()
+	result.ContractRefundAddress = refundAddr.EncodeAddress()
 	result.ContractRefundLocktime = pushes.LockTime
-	result.ContractSecretHash = pushes.SecretHash[:]
+	result.ContractSecretHash = hex.EncodeToString(pushes.SecretHash[:])
 
 	return result, nil
 }
