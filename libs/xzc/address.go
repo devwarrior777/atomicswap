@@ -5,7 +5,7 @@
 package xzc
 
 import (
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 )
 
 // newaddress gets a new wallet address from the controlled wallet

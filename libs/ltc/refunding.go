@@ -1,4 +1,3 @@
-// Copyright (c) 2017/2019 The Decred developers
 // Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -7,13 +6,15 @@ package ltc
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
+	"github.com/ltcsuite/ltcd/chaincfg/chainhash"
 	rpc "github.com/ltcsuite/ltcd/rpcclient"
 	"github.com/ltcsuite/ltcd/txscript"
 	"github.com/ltcsuite/ltcd/wire"
-	ltcutil "github.com/ltcsuite/ltcutil"
+	"github.com/ltcsuite/ltcutil"
 	"github.com/ltcsuite/ltcwallet/wallet/txrules"
 )
 
@@ -23,8 +24,20 @@ func refund(testnet bool, rpcinfo RPCInfo, params RefundParams) (RefundResult, e
 
 	chainParams := getChainParams(testnet)
 
-	contract := params.Contract
-	contractTx := params.ContractTx
+	contract, err := hex.DecodeString(params.Contract)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract: %v", err)
+	}
+
+	contractTxBytes, err := hex.DecodeString(params.ContractTx)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
+	var contractTx wire.MsgTx
+	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
 
 	pushes, err := txscript.ExtractAtomicSwapDataPushes(0, contract)
 	if err != nil {
@@ -120,8 +133,18 @@ func refund(testnet bool, rpcinfo RPCInfo, params RefundParams) (RefundResult, e
 		}
 	}
 
-	result.RefundTx = *refundTx
-	result.RefundFee = refundFee
+	var refundBuf bytes.Buffer
+	refundBuf.Grow(refundTx.SerializeSize())
+	refundTx.Serialize(&refundBuf)
+	strRefundTx := hex.EncodeToString(refundBuf.Bytes())
+
+	var refundTxHash chainhash.Hash
+	refundTxHash = refundTx.TxHash()
+	strRefundTxHash := refundTxHash.String()
+
+	result.RefundTx = strRefundTx
+	result.RefundTxHash = strRefundTxHash
+	result.RefundFee = int64(refundFee)
 	result.RefundFeePerKb = calcFeePerKb(refundFee, refundTx.SerializeSize())
 
 	return result, nil

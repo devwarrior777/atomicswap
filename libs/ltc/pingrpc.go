@@ -4,25 +4,21 @@
 
 package ltc
 
-import (
-	"github.com/ltcsuite/ltcutil"
-)
-
-// newaddress gets a new wallet address from the controlled wallet
-func newaddress(testnet bool, rpcinfo RPCInfo) (ltcutil.Address, error) {
+// pingrpc tests if wallet node RPC is available
+func pingrpc(testnet bool, rpcinfo RPCInfo) error {
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer func() {
 		rpcclient.Shutdown()
 		rpcclient.WaitForShutdown()
 	}()
 
-	addr, err := getNewAddress(testnet, rpcclient)
+	_, err = getBlockCount(testnet, rpcclient)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return addr, nil
+	return nil
 }

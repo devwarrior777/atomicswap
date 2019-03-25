@@ -9,7 +9,7 @@ import (
 	"net"
 
 	"github.com/zcoinofficial/xzcd/chaincfg"
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 )
 
 // Get a normalized address from `addr' which can be of form Host[:Port]`

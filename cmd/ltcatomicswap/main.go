@@ -7,9 +7,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"flag"
 	"fmt"
@@ -19,14 +16,7 @@ import (
 	"time"
 
 	"github.com/devwarrior777/atomicswap/libs/ltc" // Use new libs/ltc pkg
-	"github.com/ltcsuite/ltcd/chaincfg"
 	"github.com/ltcsuite/ltcd/txscript"
-	"github.com/ltcsuite/ltcd/wire"
-	ltcutil "github.com/ltcsuite/ltcutil"
-)
-
-var (
-	chainParams = &chaincfg.MainNetParams
 )
 
 var (
@@ -77,14 +67,11 @@ func init() {
 }
 
 func main() {
-	showUsage, err := run()
+	err := run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
-	if showUsage {
-		flagset.Usage()
-	}
-	if err != nil || showUsage {
+	if err != nil {
 		os.Exit(1)
 	}
 }
@@ -101,11 +88,12 @@ func checkCmdArgLength(args []string, required int) (nArgs int) {
 	return required
 }
 
-func run() (showUsage bool, err error) {
+func run() error {
 	flagset.Parse(os.Args[1:])
 	args := flagset.Args()
 	if len(args) == 0 {
-		return true, nil
+		flagset.Usage()
+		return errors.New("no args")
 	}
 	cmdArgs := 0
 	switch args[0] {
@@ -122,19 +110,18 @@ func run() (showUsage bool, err error) {
 	case "auditcontract":
 		cmdArgs = 2
 	default:
-		return true, fmt.Errorf("unknown command %v", args[0])
+		flagset.Usage()
+		return fmt.Errorf("unknown command %v", args[0])
 	}
 	nArgs := checkCmdArgLength(args[1:], cmdArgs)
 	flagset.Parse(args[1+nArgs:])
 	if nArgs < cmdArgs {
-		return true, fmt.Errorf("%s: too few arguments", args[0])
+		flagset.Usage()
+		return fmt.Errorf("%s: too few arguments", args[0])
 	}
 	if flagset.NArg() != 0 {
-		return true, fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
-	}
-
-	if *testnetFlag {
-		chainParams = &chaincfg.TestNet4Params
+		flagset.Usage()
+		return fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
 	}
 
 	switch args[0] {
@@ -156,386 +143,253 @@ func run() (showUsage bool, err error) {
 	case "auditcontract":
 		return auditContract(args)
 	}
-
-	return true, fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
+	flagset.Usage()
+	return fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
 }
 
-func initiate(args []string) (bool, error) {
-	showUsage := true
-	cp2Addr, err := ltcutil.DecodeAddress(args[1], chainParams)
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode participant address: %v", err)
-	}
-	if !cp2Addr.IsForNet(chainParams) {
-		return showUsage, fmt.Errorf("participant address is not "+
-			"intended for use on %v", chainParams.Name)
-	}
-	cp2AddrP2PKH, ok := cp2Addr.(*ltcutil.AddressPubKeyHash)
-	if !ok {
-		return showUsage, errors.New("participant address is not P2PKH")
-	}
-
+func initiate(args []string) error {
 	amountF64, err := strconv.ParseFloat(args[2], 64)
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode amount: %v", err)
+		return fmt.Errorf("failed to decode amount: %v", err)
 	}
 
-	showUsage = false
-
-	amount, err := ltcutil.NewAmount(amountF64)
+	amount, err := ltc.NewAmount(amountF64)
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 
 	var rpcinfo ltc.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
-	//dbg->
-	// var newAddr ltcutil.Address
-	// newAddr, err = ltc.GetNewAddress(*testnetFlag, rpcinfo)
-	// if err != nil {
-	// 	return showUsage, fmt.Errorf("Initiate: %v", err)
-	// }
-	// fmt.Printf("newAddr: %v\n", newAddr)
-	//<-dbg
+
+	err = ltc.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
 	var params ltc.InitiateParams
-	params.CP2AddrP2PKH = cp2AddrP2PKH
-	params.CP2Amount = amount
+	params.CP2Addr = args[1]
+	params.CP2Amount = int64(amount)
 
 	var result ltc.InitiateResult
 	result, err = ltc.Initiate(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Initiate: %v", err)
+		return fmt.Errorf("Initiate: %v", err)
 	}
 
 	var refundParams ltc.RefundParams
 	refundParams.Contract = result.Contract
-	refundParams.ContractTx = &result.ContractTx
+	refundParams.ContractTx = result.ContractTx
 
 	var refundResult ltc.RefundResult
 	refundResult, err = ltc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
-		return showUsage, fmt.Errorf("Initiate: %v", err)
+		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	contractTxHash := result.ContractTx.TxHash()
-	refundTxHash := refundResult.RefundTx.TxHash()
+	fmt.Printf("Secret:      %s\n", result.Secret)
+	fmt.Printf("Secret hash: %s\n\n", result.SecretHash)
+	fmt.Printf("Contract fee: %d (%0.8f LTC/kB)\n", result.ContractFee, result.ContractFeePerKb)
+	fmt.Printf("Refund fee:   %v (%0.8f LTC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
+	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
+	fmt.Printf("%s\n\n", result.Contract)
+	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
+	fmt.Printf("%s\n\n", result.ContractTx)
 
-	fmt.Printf("Secret:      %x\n", result.Secret)
-	fmt.Printf("Secret hash: %x\n\n", result.SecretHash)
-	fmt.Printf("Contract fee: %0.8f LTC (%0.8f LTC/kB)\n", result.ContractFee.ToBTC(), result.ContractFeePerKb)
-	fmt.Printf("Refund fee:   %0.8f LTC (%0.8f LTC/kB)\n\n", refundResult.RefundFee.ToBTC(), refundResult.RefundFeePerKb)
-	fmt.Printf("Contract (%v):\n", result.ContractP2SH)
-	fmt.Printf("%x\n\n", result.Contract)
-	var contractBuf bytes.Buffer
-	contractBuf.Grow(result.ContractTx.SerializeSize())
-	result.ContractTx.Serialize(&contractBuf)
-	fmt.Printf("Contract transaction (%v):\n", contractTxHash)
-	fmt.Printf("%x\n\n", contractBuf.Bytes())
-	var refundBuf bytes.Buffer
-	refundBuf.Grow(refundResult.RefundTx.SerializeSize())
-	refundResult.RefundTx.Serialize(&refundBuf)
-	fmt.Printf("Refund transaction (%v):\n", &refundTxHash)
-	fmt.Printf("%x\n\n", refundBuf.Bytes())
+	fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
+	fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, &result.ContractTx)
+		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, result.ContractTx)
 		if err != nil {
-			return showUsage, err
+			return err
 		}
-		fmt.Printf("Published %s transaction (%v)\n", "contract", txHash)
+		fmt.Printf("Published %s transaction (%s)\n", "contract", txHash)
 	}
 
-	return showUsage, nil
+	return nil
 }
 
-func participate(args []string) (bool, error) {
-	showUsage := true
-	cp1Addr, err := ltcutil.DecodeAddress(args[1], chainParams)
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode initiator address: %v", err)
-	}
-	if !cp1Addr.IsForNet(chainParams) {
-		return showUsage, fmt.Errorf("initiator address is not "+
-			"intended for use on %v", chainParams.Name)
-	}
-	cp1AddrP2PKH, ok := cp1Addr.(*ltcutil.AddressPubKeyHash)
-	if !ok {
-		return showUsage, errors.New("initiator address is not P2PKH")
-	}
-
+func participate(args []string) error {
 	amountF64, err := strconv.ParseFloat(args[2], 64)
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode amount: %v", err)
+		return fmt.Errorf("failed to decode amount: %v", err)
 	}
-	amount, err := ltcutil.NewAmount(amountF64)
+	amount, err := ltc.NewAmount(amountF64)
 	if err != nil {
-		return showUsage, err
+		return err
 	}
-
-	secretHash, err := hex.DecodeString(args[3])
-	if err != nil {
-		return showUsage, errors.New("secret hash must be hex encoded")
-	}
-	if len(secretHash) != sha256.Size {
-		return showUsage, errors.New("secret hash has wrong size")
-	}
-
-	showUsage = false
 
 	var rpcinfo ltc.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+
+	err = ltc.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
 	var params ltc.ParticipateParams
-	params.SecretHash = secretHash
-	params.CP1AddrP2PKH = cp1AddrP2PKH
-	params.CP1Amount = amount
+	params.SecretHash = args[3]
+	params.CP1Addr = args[1]
+	params.CP1Amount = int64(amount)
 
 	var result ltc.ParticipateResult
 	result, err = ltc.Participate(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Participate: %v", err)
+		return fmt.Errorf("Participate: %v", err)
 	}
 
 	var refundParams ltc.RefundParams
 	refundParams.Contract = result.Contract
-	refundParams.ContractTx = &result.ContractTx
+	refundParams.ContractTx = result.ContractTx
 
 	var refundResult ltc.RefundResult
 	refundResult, err = ltc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
-		return showUsage, fmt.Errorf("Refund: %v", err)
+		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	contractTxHash := result.ContractTx.TxHash()
-	refundTxHash := refundResult.RefundTx.TxHash()
+	fmt.Printf("Contract fee: %d (%0.8f LTC/kB)\n", result.ContractFee, result.ContractFeePerKb)
+	fmt.Printf("Refund fee:   %d (%0.8f LTC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
+	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
+	fmt.Printf("%s\n\n", result.Contract)
+	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
+	fmt.Printf("%s\n\n", result.ContractTx)
 
-	fmt.Printf("Contract fee: %0.8f LTC  (%0.8f LTC/kB)\n", result.ContractFee.ToBTC(), result.ContractFeePerKb)
-	fmt.Printf("Refund fee:   %0.8f LTC  (%0.8f LTC/kB)\n\n", refundResult.RefundFee.ToBTC(), refundResult.RefundFeePerKb)
-	fmt.Printf("Contract (%v):\n", result.ContractP2SH)
-	fmt.Printf("%x\n\n", result.Contract)
-	var contractBuf bytes.Buffer
-	contractBuf.Grow(result.ContractTx.SerializeSize())
-	result.ContractTx.Serialize(&contractBuf)
-	fmt.Printf("Contract transaction (%v):\n", contractTxHash)
-	fmt.Printf("%x\n\n", contractBuf.Bytes())
-
-	var refundBuf bytes.Buffer
-	refundBuf.Grow(refundResult.RefundTx.SerializeSize())
-	refundResult.RefundTx.Serialize(&refundBuf)
-	fmt.Printf("Refund transaction (%v):\n", &refundTxHash)
-	fmt.Printf("%x\n\n", refundBuf.Bytes())
+	fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
+	fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, &result.ContractTx)
+		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, result.ContractTx)
 		if err != nil {
-			return showUsage, err
+			return err
 		}
-		fmt.Printf("Published %s transaction (%v)\n", "contract", txHash)
+		fmt.Printf("Published %s transaction (%s)\n", "contract", txHash)
 	}
 
-	return showUsage, nil
+	return nil
 }
 
-func redeem(args []string) (bool, error) {
-	showUsage := true
-	contract, err := hex.DecodeString(args[1])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract: %v", err)
-	}
-
-	contractTxBytes, err := hex.DecodeString(args[2])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-	var contractTx wire.MsgTx
-	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-
-	secret, err := hex.DecodeString(args[3])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode secret: %v", err)
-	}
-
-	showUsage = false
-
+func redeem(args []string) error {
 	var rpcinfo ltc.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+
+	err := ltc.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
 	var params ltc.RedeemParams
-	params.Secret = secret
-	params.Contract = contract
-	params.ContractTx = &contractTx
+	params.Contract = args[1]
+	params.ContractTx = args[2]
+	params.Secret = args[3]
 
 	var result ltc.RedeemResult
 	result, err = ltc.Redeem(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Redeem: %v", err)
+		return fmt.Errorf("Redeem: %v", err)
 	}
 
-	redeemTx := result.RedeemTx
-	redeemTxHash := redeemTx.TxHash()
-
-	var buf bytes.Buffer
-	buf.Grow(redeemTx.SerializeSize())
-	redeemTx.Serialize(&buf)
-	fmt.Printf("Redeem fee: %0.8f LTC (%0.8f LTC/kB)\n\n", result.RedeemFee.ToBTC(), result.RedeemFeePerKb)
-	fmt.Printf("Redeem transaction (%v):\n", redeemTxHash)
-	fmt.Printf("%x\n\n", buf.Bytes())
+	fmt.Printf("Redeem fee:   %d (%0.8f LTC/kB)\n\n", result.RedeemFee, result.RedeemFeePerKb)
+	fmt.Printf("Redeem transaction (%s):\n", result.RedeemTxHash)
+	fmt.Printf("%s\n\n", result.RedeemTx)
 
 	doPublish, err := askPublishTx("redeem")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, &redeemTx)
+		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, result.RedeemTx)
 		if err != nil {
-			return false, err
+			return err
 		}
-		fmt.Printf("Published %s transaction (%v)\n", "redeem", txHash)
+		fmt.Printf("Published %s transaction (%s)\n", "redeem", txHash)
 	}
 
-	return false, nil
+	return nil
 }
 
-func refund(args []string) (bool, error) {
-	showUsage := true
-	contract, err := hex.DecodeString(args[1])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract: %v", err)
-	}
-
-	contractTxBytes, err := hex.DecodeString(args[2])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-	var contractTx wire.MsgTx
-	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-
-	showUsage = false
-
+func refund(args []string) error {
 	var rpcinfo ltc.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+
+	err := ltc.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
 	var params ltc.RefundParams
-	params.Contract = contract
-	params.ContractTx = &contractTx
+	params.Contract = args[1]
+	params.ContractTx = args[2]
 
 	var result ltc.RefundResult
 	result, err = ltc.Refund(*testnetFlag, rpcinfo, params)
 	if err != nil {
-		return showUsage, fmt.Errorf("Refund: %v", err)
+		return fmt.Errorf("Refund: %v", err)
 	}
 
-	refundTx := result.RefundTx
-	refundTxHash := refundTx.TxHash()
-
-	var buf bytes.Buffer
-	buf.Grow(refundTx.SerializeSize())
-	refundTx.Serialize(&buf)
-	fmt.Printf("Refund fee: %0.8f LTC (%0.8f LTC/kB)\n\n", result.RefundFee.ToBTC(), result.RefundFeePerKb)
-	fmt.Printf("Refund transaction (%v):\n", refundTxHash)
-	fmt.Printf("%x\n\n", buf.Bytes())
+	fmt.Printf("Refund fee: %d (%0.8f LTC/kB)\n\n", result.RefundFee, result.RefundFeePerKb)
+	fmt.Printf("Refund transaction (%s):\n", result.RefundTxHash)
+	fmt.Printf("%s\n\n", result.RefundTx)
 
 	doPublish, err := askPublishTx("refund")
 	if err != nil {
-		return showUsage, err
+		return err
 	}
 	if doPublish {
-		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, &refundTx)
+		txHash, err := ltc.Publish(*testnetFlag, rpcinfo, result.RefundTx)
 		if err != nil {
-			return showUsage, err
+			return err
 		}
-		fmt.Printf("Published %s transaction (%v)\n", "refund", txHash)
+		fmt.Printf("Published %s transaction (%s)\n", "refund", txHash)
 	}
 
-	return showUsage, nil
+	return nil
 }
 
-func extractSecret(args []string) (bool, error) {
-	showUsage := true
-	redemptionTxBytes, err := hex.DecodeString(args[1])
+func extractSecret(args []string) error {
+	secret, err := ltc.ExtractSecret(args[1], args[2])
 	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode redemption transaction: %v", err)
-	}
-	var redemptionTx wire.MsgTx
-	err = redemptionTx.Deserialize(bytes.NewReader(redemptionTxBytes))
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode redemption transaction: %v", err)
+		return err
 	}
 
-	secretHash, err := hex.DecodeString(args[2])
-	if err != nil {
-		return showUsage, errors.New("secret hash must be hex encoded")
-	}
-	if len(secretHash) != sha256.Size {
-		return showUsage, errors.New("secret hash has wrong size")
-	}
+	fmt.Printf("Contract shared secret: %s\n", secret)
 
-	showUsage = false
-
-	secret, err := ltc.ExtractSecret(&redemptionTx, secretHash)
-	if err != nil {
-		return showUsage, err
-	}
-
-	fmt.Printf("Contract shared secret: %x\n", secret)
-
-	return showUsage, nil
+	return nil
 }
 
-func auditContract(args []string) (bool, error) {
-	showUsage := true
-	contract, err := hex.DecodeString(args[1])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract: %v", err)
-	}
-
-	contractTxBytes, err := hex.DecodeString(args[2])
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-	var contractTx wire.MsgTx
-	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
-	if err != nil {
-		return showUsage, fmt.Errorf("failed to decode contract transaction: %v", err)
-	}
-
-	showUsage = false
-
+func auditContract(args []string) error {
 	var params ltc.AuditParams
-	params.Contract = contract
-	params.ContractTx = &contractTx
+	params.Contract = args[1]
+	params.ContractTx = args[2]
 
 	var result ltc.AuditResult
-	result, err = ltc.AuditContract(*testnetFlag, params)
+	result, err := ltc.AuditContract(*testnetFlag, params)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	fmt.Printf("Contract address:        %v\n", result.ContractAddress.EncodeAddress())
-	fmt.Printf("Contract value:          %0.8f LTC\n", result.ContractAmount.ToBTC())
-	fmt.Printf("Recipient address:       %v\n", result.ContractRecipientAddress.EncodeAddress())
-	fmt.Printf("Author's refund address: %v\n\n", result.ContractRefundAddress.EncodeAddress())
+	fmt.Printf("Contract address:        %s\n", result.ContractAddress)
+	fmt.Printf("Contract value:          %v\n", ltc.Amount(result.ContractAmount))
+	fmt.Printf("Recipient address:       %s\n", result.ContractRecipientAddress)
+	fmt.Printf("Author's refund address: %s\n\n", result.ContractRefundAddress)
 
-	fmt.Printf("Secret hash: %x\n\n", result.ContractSecretHash)
+	fmt.Printf("Secret hash: %s\n\n", result.ContractSecretHash)
 
 	locktime := result.ContractRefundLocktime
 	if locktime >= int64(txscript.LockTimeThreshold) {
@@ -551,7 +405,7 @@ func auditContract(args []string) (bool, error) {
 		fmt.Printf("Locktime: block %v\n", locktime)
 	}
 
-	return false, nil
+	return nil
 }
 
 func askPublishTx(name string) (bool, error) {

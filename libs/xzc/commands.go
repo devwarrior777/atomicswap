@@ -9,7 +9,7 @@ package xzc
 /////////////////////////////////////////////////////////////////////
 
 import (
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 )
 
 const verify = true

@@ -1,4 +1,3 @@
-// Copyright (c) 2017/2019 The Decred developers
 // Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -7,12 +6,14 @@ package ltc
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
+	"github.com/ltcsuite/ltcd/chaincfg/chainhash"
 	"github.com/ltcsuite/ltcd/txscript"
 	"github.com/ltcsuite/ltcd/wire"
-	ltcutil "github.com/ltcsuite/ltcutil"
+	"github.com/ltcsuite/ltcutil"
 	"github.com/ltcsuite/ltcwallet/wallet/txrules"
 )
 
@@ -23,9 +24,25 @@ func redeem(testnet bool, rpcinfo RPCInfo, params RedeemParams) (RedeemResult, e
 
 	chainParams := getChainParams(testnet)
 
-	secret := params.Secret
-	contract := params.Contract
-	contractTx := params.ContractTx
+	contract, err := hex.DecodeString(params.Contract)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract: %v", err)
+	}
+
+	contractTxBytes, err := hex.DecodeString(params.ContractTx)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
+	var contractTx wire.MsgTx
+	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
+
+	secret, err := hex.DecodeString(params.Secret)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode secret: %v", err)
+	}
 
 	pushes, err := txscript.ExtractAtomicSwapDataPushes(0, contract)
 	if err != nil {
@@ -87,8 +104,8 @@ func redeem(testnet bool, rpcinfo RPCInfo, params RedeemParams) (RedeemResult, e
 	redeemTx.AddTxIn(wire.NewTxIn(&contractOutPoint, nil, nil))
 	redeemTx.AddTxOut(wire.NewTxOut(0, outScript)) // amount set below
 	redeemSize := estimateRedeemSerializeSize(contract, redeemTx.TxOut)
-	fee := txrules.FeeForSerializeSize(feePerKb, redeemSize)
-	redeemTx.TxOut[0].Value = contractTx.TxOut[contractOut].Value - int64(fee)
+	redeemFee := txrules.FeeForSerializeSize(feePerKb, redeemSize)
+	redeemTx.TxOut[0].Value = contractTx.TxOut[contractOut].Value - int64(redeemFee)
 	if txrules.IsDustOutput(redeemTx.TxOut[0], minFeePerKb) {
 		return result, fmt.Errorf("redeem output value of %v is dust", ltcutil.Amount(redeemTx.TxOut[0].Value))
 	}
@@ -116,9 +133,19 @@ func redeem(testnet bool, rpcinfo RPCInfo, params RedeemParams) (RedeemResult, e
 		}
 	}
 
-	result.RedeemTx = *redeemTx
-	result.RedeemFee = fee
-	result.RedeemFeePerKb = calcFeePerKb(fee, redeemTx.SerializeSize())
+	var redeemBuf bytes.Buffer
+	redeemBuf.Grow(redeemTx.SerializeSize())
+	redeemTx.Serialize(&redeemBuf)
+	strRefundTx := hex.EncodeToString(redeemBuf.Bytes())
+
+	var redeemTxHash chainhash.Hash
+	redeemTxHash = redeemTx.TxHash()
+	strRedeemTxHash := redeemTxHash.String()
+
+	result.RedeemTx = strRefundTx
+	result.RedeemTxHash = strRedeemTxHash
+	result.RedeemFee = int64(redeemFee)
+	result.RedeemFeePerKb = calcFeePerKb(redeemFee, redeemTx.SerializeSize())
 
 	return result, nil
 }

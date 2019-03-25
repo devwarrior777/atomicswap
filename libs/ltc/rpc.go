@@ -1,4 +1,3 @@
-// Copyright (c) 2017/2019 The Decred developers
 // Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -15,7 +14,7 @@ import (
 	rpc "github.com/ltcsuite/ltcd/rpcclient"
 	"github.com/ltcsuite/ltcd/txscript"
 	"github.com/ltcsuite/ltcd/wire"
-	ltcutil "github.com/ltcsuite/ltcutil"
+	"github.com/ltcsuite/ltcutil"
 )
 
 // startRPC - starts a new RPC client for the network and address specified
@@ -49,6 +48,21 @@ func stopRPC(client *rpc.Client) {
 // RPC funcs //
 ///////////////
 
+// getBlockCount calls the getblockcount JSON-RPC method. It is
+// currently used as a simple 'ping' to discover if node RPC is available
+func getBlockCount(testnet bool, rpcclient *rpc.Client) (int, error) {
+	rawResp, err := rpcclient.RawRequest("getblockcount", nil)
+	if err != nil {
+		return -1, err
+	}
+	var blockCount int
+	err = json.Unmarshal(rawResp, &blockCount)
+	if err != nil {
+		return -1, err
+	}
+	return blockCount, nil
+}
+
 // getNewAddress calls the getnewaddress JSON-RPC method.  It is
 // implemented manually as the rpcclient implementation always passes the
 // account parameter which was removed in Bitcoin Core 0.15.
@@ -59,7 +73,6 @@ func getNewAddress(testnet bool, rpcclient *rpc.Client) (ltcutil.Address, error)
 	param1 := []json.RawMessage{[]byte(`"legacy"`)}
 	params := append(param0, param1...)
 	rawResp, err := rpcclient.RawRequest("getnewaddress", params)
-	//
 	if err != nil {
 		return nil, err
 	}

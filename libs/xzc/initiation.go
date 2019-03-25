@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 )
 
 // initiate creates a new secret then builds a contract & a contract transaction depending

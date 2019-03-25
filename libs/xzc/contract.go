@@ -11,7 +11,7 @@ import (
 	rpc "github.com/zcoinofficial/xzcd/rpcclient"
 	"github.com/zcoinofficial/xzcd/txscript"
 	"github.com/zcoinofficial/xzcd/wire"
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 	"golang.org/x/crypto/ripemd160"
 )
 

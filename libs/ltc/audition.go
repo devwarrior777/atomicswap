@@ -1,4 +1,3 @@
-// Copyright (c) 2017/2019 The Decred developers
 // Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -7,11 +6,13 @@ package ltc
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
 	"github.com/ltcsuite/ltcd/txscript"
-	ltcutil "github.com/ltcsuite/ltcutil"
+	"github.com/ltcsuite/ltcd/wire"
+	"github.com/ltcsuite/ltcutil"
 )
 
 // auditContract pulls out information from the counterparty's contract
@@ -20,8 +21,21 @@ func auditContract(testnet bool, params AuditParams) (AuditResult, error) {
 
 	chainParams := getChainParams(testnet)
 
-	contract := params.Contract
-	contractTx := params.ContractTx
+	contract, err := hex.DecodeString(params.Contract)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract: %v", err)
+	}
+
+	contractTxBytes, err := hex.DecodeString(params.ContractTx)
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
+
+	var contractTx wire.MsgTx
+	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
+	if err != nil {
+		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+	}
 
 	contractHash160 := ltcutil.Hash160(contract)
 	contractOut := -1
@@ -65,12 +79,12 @@ func auditContract(testnet bool, params AuditParams) (AuditResult, error) {
 		return result, err
 	}
 
-	result.ContractAddress = *contractAddr
-	result.ContractAmount = ltcutil.Amount(contractTx.TxOut[contractOut].Value)
-	result.ContractRecipientAddress = *recipientAddr
-	result.ContractRefundAddress = *refundAddr
+	result.ContractAddress = contractAddr.EncodeAddress()
+	result.ContractAmount = contractTx.TxOut[contractOut].Value
+	result.ContractRecipientAddress = recipientAddr.EncodeAddress()
+	result.ContractRefundAddress = refundAddr.EncodeAddress()
 	result.ContractRefundLocktime = pushes.LockTime
-	result.ContractSecretHash = pushes.SecretHash[:]
+	result.ContractSecretHash = hex.EncodeToString(pushes.SecretHash[:])
 
 	return result, nil
 }

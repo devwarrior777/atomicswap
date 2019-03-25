@@ -12,7 +12,7 @@ import (
 
 	"github.com/zcoinofficial/xzcd/txscript"
 	"github.com/zcoinofficial/xzcd/wire"
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 )
 
 // auditContract pulls out information from the counterparty's contract

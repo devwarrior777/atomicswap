@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 )
 
 // participate builds a contract & a contract transaction depending upon the hash of the

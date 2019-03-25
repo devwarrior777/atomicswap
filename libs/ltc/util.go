@@ -1,4 +1,3 @@
-// Copyright (c) 2018/2019 The Litecoin developers
 // Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
@@ -10,7 +9,7 @@ import (
 	"net"
 
 	"github.com/ltcsuite/ltcd/chaincfg"
-	ltcutil "github.com/ltcsuite/ltcutil"
+	"github.com/ltcsuite/ltcutil"
 )
 
 // Get a normalized address from `addr' which can be of form Host[:Port]`

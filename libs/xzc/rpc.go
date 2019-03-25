@@ -16,7 +16,7 @@ import (
 	rpc "github.com/zcoinofficial/xzcd/rpcclient"
 	"github.com/zcoinofficial/xzcd/txscript"
 	"github.com/zcoinofficial/xzcd/wire"
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 )
 
 // startRPC - starts a new RPC client for the network and address specified

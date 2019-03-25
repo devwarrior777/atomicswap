@@ -10,9 +10,7 @@ package ltc
 /////////////////////////////////////////////////////////////////////
 
 import (
-	"github.com/ltcsuite/ltcd/chaincfg/chainhash"
-	"github.com/ltcsuite/ltcd/wire"
-	ltcutil "github.com/ltcsuite/ltcutil"
+	"github.com/ltcsuite/ltcutil"
 )
 
 const verify = true
@@ -28,6 +26,11 @@ type RPCInfo struct {
 	HostPort string
 }
 
+// PingRPC tests if wallet node RPC is available
+func PingRPC(testnet bool, rpcinfo RPCInfo) error {
+	return pingrpc(testnet, rpcinfo)
+}
+
 // GetNewAddress gets a new address from the controlled wallet
 func GetNewAddress(testnet bool, rpcinfo RPCInfo) (ltcutil.Address, error) {
 	return newaddress(testnet, rpcinfo)
@@ -35,18 +38,19 @@ func GetNewAddress(testnet bool, rpcinfo RPCInfo) (ltcutil.Address, error) {
 
 //InitiateParams is passed to the Initiate function
 type InitiateParams struct {
-	CP2AddrP2PKH *ltcutil.AddressPubKeyHash
-	CP2Amount    ltcutil.Amount
+	CP2Addr   string
+	CP2Amount int64
 }
 
 //InitiateResult is returned from the Initiate function
 type InitiateResult struct {
-	Secret           []byte
-	SecretHash       []byte
-	Contract         []byte
-	ContractP2SH     ltcutil.Address
-	ContractTx       wire.MsgTx
-	ContractFee      ltcutil.Amount
+	Secret           string
+	SecretHash       string
+	Contract         string
+	ContractP2SH     string
+	ContractTx       string
+	ContractTxHash   string
+	ContractFee      int64
 	ContractFeePerKb float64
 }
 
@@ -57,17 +61,18 @@ func Initiate(testnet bool, rpcinfo RPCInfo, params InitiateParams) (InitiateRes
 
 //ParticipateParams is passed to the Participate command
 type ParticipateParams struct {
-	SecretHash   []byte
-	CP1AddrP2PKH *ltcutil.AddressPubKeyHash
-	CP1Amount    ltcutil.Amount
+	SecretHash string
+	CP1Addr    string
+	CP1Amount  int64
 }
 
 //ParticipateResult is returned from the Participate command
 type ParticipateResult struct {
-	Contract         []byte
-	ContractP2SH     ltcutil.Address
-	ContractTx       wire.MsgTx
-	ContractFee      ltcutil.Amount
+	Contract         string
+	ContractP2SH     string
+	ContractTx       string
+	ContractTxHash   string
+	ContractFee      int64
 	ContractFeePerKb float64
 }
 
@@ -78,15 +83,16 @@ func Participate(testnet bool, rpcinfo RPCInfo, params ParticipateParams) (Parti
 
 // RedeemParams is passed to the Redeem command
 type RedeemParams struct {
-	Secret     []byte
-	Contract   []byte
-	ContractTx *wire.MsgTx
+	Secret     string
+	Contract   string
+	ContractTx string
 }
 
 // RedeemResult is returned from the Redeem command
 type RedeemResult struct {
-	RedeemTx       wire.MsgTx
-	RedeemFee      ltcutil.Amount
+	RedeemTx       string
+	RedeemTxHash   string
+	RedeemFee      int64
 	RedeemFeePerKb float64
 }
 
@@ -97,14 +103,15 @@ func Redeem(testnet bool, rpcinfo RPCInfo, params RedeemParams) (RedeemResult, e
 
 // RefundParams is passed to Refund command
 type RefundParams struct {
-	Contract   []byte
-	ContractTx *wire.MsgTx
+	Contract   string
+	ContractTx string
 }
 
 // RefundResult is returned from Refund command
 type RefundResult struct {
-	RefundTx       wire.MsgTx
-	RefundFee      ltcutil.Amount
+	RefundTx       string
+	RefundTxHash   string
+	RefundFee      int64
 	RefundFeePerKb float64
 }
 
@@ -115,17 +122,17 @@ func Refund(testnet bool, rpcinfo RPCInfo, params RefundParams) (RefundResult, e
 
 // AuditParams is passed to Audit command
 type AuditParams struct {
-	Contract   []byte
-	ContractTx *wire.MsgTx
+	Contract   string
+	ContractTx string
 }
 
 // AuditResult is returned from Audit command
 type AuditResult struct {
-	ContractAmount           ltcutil.Amount
-	ContractAddress          ltcutil.AddressScriptHash
-	ContractSecretHash       []byte
-	ContractRecipientAddress ltcutil.AddressPubKeyHash
-	ContractRefundAddress    ltcutil.AddressPubKeyHash
+	ContractAmount           int64
+	ContractAddress          string
+	ContractSecretHash       string
+	ContractRecipientAddress string
+	ContractRefundAddress    string
 	ContractRefundLocktime   int64
 }
 
@@ -135,16 +142,16 @@ func AuditContract(testnet bool, params AuditParams) (AuditResult, error) {
 }
 
 // Publish command broadcasts a raw hex transaction
-func Publish(testnet bool, rpcinfo RPCInfo, tx *wire.MsgTx) (*chainhash.Hash, error) {
+func Publish(testnet bool, rpcinfo RPCInfo, tx string) (string, error) {
 	txhash, err := publish(testnet, rpcinfo, tx)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return txhash, nil
 }
 
 // ExtractSecret returns a secret from the scriptSig of a transaction redeeming a contract
-func ExtractSecret(redemptionTx *wire.MsgTx, secretHash []byte) ([]byte, error) {
+func ExtractSecret(redemptionTx string, secretHash string) (string, error) {
 	return extractSecret(redemptionTx, secretHash)
 }
 
