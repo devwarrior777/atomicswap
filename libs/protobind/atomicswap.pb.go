@@ -20,34 +20,9 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type NetType int32
-
-const (
-	NetType_MAINNET NetType = 0
-	NetType_TESTNET NetType = 1
-)
-
-var NetType_name = map[int32]string{
-	0: "MAINNET",
-	1: "TESTNET",
-}
-
-var NetType_value = map[string]int32{
-	"MAINNET": 0,
-	"TESTNET": 1,
-}
-
-func (x NetType) String() string {
-	return proto.EnumName(NetType_name, int32(x))
-}
-
-func (NetType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_9afe1911bb3b5204, []int{0}
-}
-
 type PingWalletRpcRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
 	Rpcpass              string   `protobuf:"bytes,7,opt,name=rpcpass,proto3" json:"rpcpass,omitempty"`
@@ -88,11 +63,11 @@ func (m *PingWalletRpcRequest) GetCoin() string {
 	return ""
 }
 
-func (m *PingWalletRpcRequest) GetNet() NetType {
+func (m *PingWalletRpcRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *PingWalletRpcRequest) GetHostport() string {
@@ -117,9 +92,6 @@ func (m *PingWalletRpcRequest) GetRpcpass() string {
 }
 
 type PingWalletRpcResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
-	Address              string   `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -152,27 +124,6 @@ func (m *PingWalletRpcResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_PingWalletRpcResponse proto.InternalMessageInfo
 
-func (m *PingWalletRpcResponse) GetCoin() string {
-	if m != nil {
-		return m.Coin
-	}
-	return ""
-}
-
-func (m *PingWalletRpcResponse) GetNet() NetType {
-	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
-func (m *PingWalletRpcResponse) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
 func (m *PingWalletRpcResponse) GetErrorno() int32 {
 	if m != nil {
 		return m.Errorno
@@ -189,7 +140,7 @@ func (m *PingWalletRpcResponse) GetErrstr() string {
 
 type NewAddressRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
 	Rpcpass              string   `protobuf:"bytes,7,opt,name=rpcpass,proto3" json:"rpcpass,omitempty"`
@@ -230,11 +181,11 @@ func (m *NewAddressRequest) GetCoin() string {
 	return ""
 }
 
-func (m *NewAddressRequest) GetNet() NetType {
+func (m *NewAddressRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *NewAddressRequest) GetHostport() string {
@@ -259,8 +210,6 @@ func (m *NewAddressRequest) GetRpcpass() string {
 }
 
 type NewAddressResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
 	Address              string   `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
@@ -294,20 +243,6 @@ func (m *NewAddressResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_NewAddressResponse proto.InternalMessageInfo
 
-func (m *NewAddressResponse) GetCoin() string {
-	if m != nil {
-		return m.Coin
-	}
-	return ""
-}
-
-func (m *NewAddressResponse) GetNet() NetType {
-	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
 func (m *NewAddressResponse) GetAddress() string {
 	if m != nil {
 		return m.Address
@@ -331,12 +266,12 @@ func (m *NewAddressResponse) GetErrstr() string {
 
 type InitiateRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
 	Rpcpass              string   `protobuf:"bytes,7,opt,name=rpcpass,proto3" json:"rpcpass,omitempty"`
 	PartAddress          string   `protobuf:"bytes,8,opt,name=part_address,json=partAddress,proto3" json:"part_address,omitempty"`
-	Amount               uint64   `protobuf:"varint,9,opt,name=amount,proto3" json:"amount,omitempty"`
+	Amount               int64    `protobuf:"varint,9,opt,name=amount,proto3" json:"amount,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -374,11 +309,11 @@ func (m *InitiateRequest) GetCoin() string {
 	return ""
 }
 
-func (m *InitiateRequest) GetNet() NetType {
+func (m *InitiateRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *InitiateRequest) GetHostport() string {
@@ -409,7 +344,7 @@ func (m *InitiateRequest) GetPartAddress() string {
 	return ""
 }
 
-func (m *InitiateRequest) GetAmount() uint64 {
+func (m *InitiateRequest) GetAmount() int64 {
 	if m != nil {
 		return m.Amount
 	}
@@ -417,13 +352,14 @@ func (m *InitiateRequest) GetAmount() uint64 {
 }
 
 type InitiateResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
 	Secret               string   `protobuf:"bytes,5,opt,name=secret,proto3" json:"secret,omitempty"`
-	Contract             string   `protobuf:"bytes,6,opt,name=contract,proto3" json:"contract,omitempty"`
-	ContractTx           string   `protobuf:"bytes,7,opt,name=contract_tx,json=contractTx,proto3" json:"contract_tx,omitempty"`
-	Fee                  uint64   `protobuf:"varint,8,opt,name=fee,proto3" json:"fee,omitempty"`
-	Feerate              uint64   `protobuf:"varint,9,opt,name=feerate,proto3" json:"feerate,omitempty"`
+	Secrethash           string   `protobuf:"bytes,6,opt,name=secrethash,proto3" json:"secrethash,omitempty"`
+	Contract             string   `protobuf:"bytes,7,opt,name=contract,proto3" json:"contract,omitempty"`
+	ContractP2Sh         string   `protobuf:"bytes,8,opt,name=contract_p2sh,json=contractP2sh,proto3" json:"contract_p2sh,omitempty"`
+	ContractTx           string   `protobuf:"bytes,9,opt,name=contract_tx,json=contractTx,proto3" json:"contract_tx,omitempty"`
+	ContractTxHash       string   `protobuf:"bytes,10,opt,name=contract_tx_hash,json=contractTxHash,proto3" json:"contract_tx_hash,omitempty"`
+	Fee                  int64    `protobuf:"varint,11,opt,name=fee,proto3" json:"fee,omitempty"`
+	Feerate              float32  `protobuf:"fixed32,12,opt,name=feerate,proto3" json:"feerate,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -456,23 +392,16 @@ func (m *InitiateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_InitiateResponse proto.InternalMessageInfo
 
-func (m *InitiateResponse) GetCoin() string {
+func (m *InitiateResponse) GetSecret() string {
 	if m != nil {
-		return m.Coin
+		return m.Secret
 	}
 	return ""
 }
 
-func (m *InitiateResponse) GetNet() NetType {
+func (m *InitiateResponse) GetSecrethash() string {
 	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
-func (m *InitiateResponse) GetSecret() string {
-	if m != nil {
-		return m.Secret
+		return m.Secrethash
 	}
 	return ""
 }
@@ -484,6 +413,13 @@ func (m *InitiateResponse) GetContract() string {
 	return ""
 }
 
+func (m *InitiateResponse) GetContractP2Sh() string {
+	if m != nil {
+		return m.ContractP2Sh
+	}
+	return ""
+}
+
 func (m *InitiateResponse) GetContractTx() string {
 	if m != nil {
 		return m.ContractTx
@@ -491,14 +427,21 @@ func (m *InitiateResponse) GetContractTx() string {
 	return ""
 }
 
-func (m *InitiateResponse) GetFee() uint64 {
+func (m *InitiateResponse) GetContractTxHash() string {
+	if m != nil {
+		return m.ContractTxHash
+	}
+	return ""
+}
+
+func (m *InitiateResponse) GetFee() int64 {
 	if m != nil {
 		return m.Fee
 	}
 	return 0
 }
 
-func (m *InitiateResponse) GetFeerate() uint64 {
+func (m *InitiateResponse) GetFeerate() float32 {
 	if m != nil {
 		return m.Feerate
 	}
@@ -521,13 +464,13 @@ func (m *InitiateResponse) GetErrstr() string {
 
 type ParticipateRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
 	Rpcpass              string   `protobuf:"bytes,7,opt,name=rpcpass,proto3" json:"rpcpass,omitempty"`
 	Secrethash           string   `protobuf:"bytes,8,opt,name=secrethash,proto3" json:"secrethash,omitempty"`
 	PartAddress          string   `protobuf:"bytes,9,opt,name=part_address,json=partAddress,proto3" json:"part_address,omitempty"`
-	Amount               uint64   `protobuf:"varint,10,opt,name=amount,proto3" json:"amount,omitempty"`
+	Amount               int64    `protobuf:"varint,10,opt,name=amount,proto3" json:"amount,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -565,11 +508,11 @@ func (m *ParticipateRequest) GetCoin() string {
 	return ""
 }
 
-func (m *ParticipateRequest) GetNet() NetType {
+func (m *ParticipateRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *ParticipateRequest) GetHostport() string {
@@ -607,7 +550,7 @@ func (m *ParticipateRequest) GetPartAddress() string {
 	return ""
 }
 
-func (m *ParticipateRequest) GetAmount() uint64 {
+func (m *ParticipateRequest) GetAmount() int64 {
 	if m != nil {
 		return m.Amount
 	}
@@ -615,12 +558,12 @@ func (m *ParticipateRequest) GetAmount() uint64 {
 }
 
 type ParticipateResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
 	Contract             string   `protobuf:"bytes,5,opt,name=contract,proto3" json:"contract,omitempty"`
-	ContractTx           string   `protobuf:"bytes,6,opt,name=contract_tx,json=contractTx,proto3" json:"contract_tx,omitempty"`
-	Fee                  uint64   `protobuf:"varint,7,opt,name=fee,proto3" json:"fee,omitempty"`
-	Feerate              uint64   `protobuf:"varint,8,opt,name=feerate,proto3" json:"feerate,omitempty"`
+	ContractP2Sh         string   `protobuf:"bytes,6,opt,name=contract_p2sh,json=contractP2sh,proto3" json:"contract_p2sh,omitempty"`
+	ContractTx           string   `protobuf:"bytes,7,opt,name=contract_tx,json=contractTx,proto3" json:"contract_tx,omitempty"`
+	ContractTxHash       string   `protobuf:"bytes,8,opt,name=contract_tx_hash,json=contractTxHash,proto3" json:"contract_tx_hash,omitempty"`
+	Fee                  int64    `protobuf:"varint,9,opt,name=fee,proto3" json:"fee,omitempty"`
+	Feerate              float32  `protobuf:"fixed32,10,opt,name=feerate,proto3" json:"feerate,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -653,23 +596,16 @@ func (m *ParticipateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ParticipateResponse proto.InternalMessageInfo
 
-func (m *ParticipateResponse) GetCoin() string {
+func (m *ParticipateResponse) GetContract() string {
 	if m != nil {
-		return m.Coin
+		return m.Contract
 	}
 	return ""
 }
 
-func (m *ParticipateResponse) GetNet() NetType {
+func (m *ParticipateResponse) GetContractP2Sh() string {
 	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
-func (m *ParticipateResponse) GetContract() string {
-	if m != nil {
-		return m.Contract
+		return m.ContractP2Sh
 	}
 	return ""
 }
@@ -681,14 +617,21 @@ func (m *ParticipateResponse) GetContractTx() string {
 	return ""
 }
 
-func (m *ParticipateResponse) GetFee() uint64 {
+func (m *ParticipateResponse) GetContractTxHash() string {
+	if m != nil {
+		return m.ContractTxHash
+	}
+	return ""
+}
+
+func (m *ParticipateResponse) GetFee() int64 {
 	if m != nil {
 		return m.Fee
 	}
 	return 0
 }
 
-func (m *ParticipateResponse) GetFeerate() uint64 {
+func (m *ParticipateResponse) GetFeerate() float32 {
 	if m != nil {
 		return m.Feerate
 	}
@@ -711,7 +654,7 @@ func (m *ParticipateResponse) GetErrstr() string {
 
 type RedeemRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
 	Rpcpass              string   `protobuf:"bytes,7,opt,name=rpcpass,proto3" json:"rpcpass,omitempty"`
@@ -755,11 +698,11 @@ func (m *RedeemRequest) GetCoin() string {
 	return ""
 }
 
-func (m *RedeemRequest) GetNet() NetType {
+func (m *RedeemRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *RedeemRequest) GetHostport() string {
@@ -805,11 +748,10 @@ func (m *RedeemRequest) GetContractTx() uint64 {
 }
 
 type RedeemResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
 	RedeemTx             string   `protobuf:"bytes,5,opt,name=redeem_tx,json=redeemTx,proto3" json:"redeem_tx,omitempty"`
-	Fee                  uint64   `protobuf:"varint,6,opt,name=fee,proto3" json:"fee,omitempty"`
-	Feerate              uint64   `protobuf:"varint,7,opt,name=feerate,proto3" json:"feerate,omitempty"`
+	RedeemTxHash         string   `protobuf:"bytes,6,opt,name=redeem_tx_hash,json=redeemTxHash,proto3" json:"redeem_tx_hash,omitempty"`
+	Fee                  int64    `protobuf:"varint,7,opt,name=fee,proto3" json:"fee,omitempty"`
+	Feerate              float32  `protobuf:"fixed32,8,opt,name=feerate,proto3" json:"feerate,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -842,20 +784,6 @@ func (m *RedeemResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RedeemResponse proto.InternalMessageInfo
 
-func (m *RedeemResponse) GetCoin() string {
-	if m != nil {
-		return m.Coin
-	}
-	return ""
-}
-
-func (m *RedeemResponse) GetNet() NetType {
-	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
 func (m *RedeemResponse) GetRedeemTx() string {
 	if m != nil {
 		return m.RedeemTx
@@ -863,14 +791,21 @@ func (m *RedeemResponse) GetRedeemTx() string {
 	return ""
 }
 
-func (m *RedeemResponse) GetFee() uint64 {
+func (m *RedeemResponse) GetRedeemTxHash() string {
+	if m != nil {
+		return m.RedeemTxHash
+	}
+	return ""
+}
+
+func (m *RedeemResponse) GetFee() int64 {
 	if m != nil {
 		return m.Fee
 	}
 	return 0
 }
 
-func (m *RedeemResponse) GetFeerate() uint64 {
+func (m *RedeemResponse) GetFeerate() float32 {
 	if m != nil {
 		return m.Feerate
 	}
@@ -893,7 +828,7 @@ func (m *RedeemResponse) GetErrstr() string {
 
 type RefundRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
 	Rpcpass              string   `protobuf:"bytes,7,opt,name=rpcpass,proto3" json:"rpcpass,omitempty"`
@@ -936,11 +871,11 @@ func (m *RefundRequest) GetCoin() string {
 	return ""
 }
 
-func (m *RefundRequest) GetNet() NetType {
+func (m *RefundRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *RefundRequest) GetHostport() string {
@@ -979,11 +914,10 @@ func (m *RefundRequest) GetContractTx() uint64 {
 }
 
 type RefundResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
 	RefundTx             string   `protobuf:"bytes,5,opt,name=refund_tx,json=refundTx,proto3" json:"refund_tx,omitempty"`
-	Fee                  uint64   `protobuf:"varint,6,opt,name=fee,proto3" json:"fee,omitempty"`
-	Feerate              uint64   `protobuf:"varint,7,opt,name=feerate,proto3" json:"feerate,omitempty"`
+	RefundTxHash         string   `protobuf:"bytes,6,opt,name=refund_tx_hash,json=refundTxHash,proto3" json:"refund_tx_hash,omitempty"`
+	Fee                  int64    `protobuf:"varint,7,opt,name=fee,proto3" json:"fee,omitempty"`
+	Feerate              float32  `protobuf:"fixed32,8,opt,name=feerate,proto3" json:"feerate,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1016,20 +950,6 @@ func (m *RefundResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RefundResponse proto.InternalMessageInfo
 
-func (m *RefundResponse) GetCoin() string {
-	if m != nil {
-		return m.Coin
-	}
-	return ""
-}
-
-func (m *RefundResponse) GetNet() NetType {
-	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
 func (m *RefundResponse) GetRefundTx() string {
 	if m != nil {
 		return m.RefundTx
@@ -1037,14 +957,21 @@ func (m *RefundResponse) GetRefundTx() string {
 	return ""
 }
 
-func (m *RefundResponse) GetFee() uint64 {
+func (m *RefundResponse) GetRefundTxHash() string {
+	if m != nil {
+		return m.RefundTxHash
+	}
+	return ""
+}
+
+func (m *RefundResponse) GetFee() int64 {
 	if m != nil {
 		return m.Fee
 	}
 	return 0
 }
 
-func (m *RefundResponse) GetFeerate() uint64 {
+func (m *RefundResponse) GetFeerate() float32 {
 	if m != nil {
 		return m.Feerate
 	}
@@ -1067,11 +994,11 @@ func (m *RefundResponse) GetErrstr() string {
 
 type PublishRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
 	Rpcpass              string   `protobuf:"bytes,7,opt,name=rpcpass,proto3" json:"rpcpass,omitempty"`
-	Tx                   uint64   `protobuf:"varint,8,opt,name=tx,proto3" json:"tx,omitempty"`
+	Tx                   string   `protobuf:"bytes,8,opt,name=tx,proto3" json:"tx,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1109,11 +1036,11 @@ func (m *PublishRequest) GetCoin() string {
 	return ""
 }
 
-func (m *PublishRequest) GetNet() NetType {
+func (m *PublishRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *PublishRequest) GetHostport() string {
@@ -1137,17 +1064,15 @@ func (m *PublishRequest) GetRpcpass() string {
 	return ""
 }
 
-func (m *PublishRequest) GetTx() uint64 {
+func (m *PublishRequest) GetTx() string {
 	if m != nil {
 		return m.Tx
 	}
-	return 0
+	return ""
 }
 
 type PublishResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
-	Txhash               string   `protobuf:"bytes,5,opt,name=txhash,proto3" json:"txhash,omitempty"`
+	TxHash               string   `protobuf:"bytes,5,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1180,23 +1105,9 @@ func (m *PublishResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_PublishResponse proto.InternalMessageInfo
 
-func (m *PublishResponse) GetCoin() string {
+func (m *PublishResponse) GetTxHash() string {
 	if m != nil {
-		return m.Coin
-	}
-	return ""
-}
-
-func (m *PublishResponse) GetNet() NetType {
-	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
-func (m *PublishResponse) GetTxhash() string {
-	if m != nil {
-		return m.Txhash
+		return m.TxHash
 	}
 	return ""
 }
@@ -1217,7 +1128,7 @@ func (m *PublishResponse) GetErrstr() string {
 
 type ExtractSecretRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	CpRedemptionTx       string   `protobuf:"bytes,5,opt,name=cp_redemption_tx,json=cpRedemptionTx,proto3" json:"cp_redemption_tx,omitempty"`
 	Secrethash           string   `protobuf:"bytes,6,opt,name=secrethash,proto3" json:"secrethash,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1257,11 +1168,11 @@ func (m *ExtractSecretRequest) GetCoin() string {
 	return ""
 }
 
-func (m *ExtractSecretRequest) GetNet() NetType {
+func (m *ExtractSecretRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *ExtractSecretRequest) GetCpRedemptionTx() string {
@@ -1279,8 +1190,6 @@ func (m *ExtractSecretRequest) GetSecrethash() string {
 }
 
 type ExtractSecretResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
 	Secret               string   `protobuf:"bytes,5,opt,name=secret,proto3" json:"secret,omitempty"`
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
@@ -1314,20 +1223,6 @@ func (m *ExtractSecretResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ExtractSecretResponse proto.InternalMessageInfo
 
-func (m *ExtractSecretResponse) GetCoin() string {
-	if m != nil {
-		return m.Coin
-	}
-	return ""
-}
-
-func (m *ExtractSecretResponse) GetNet() NetType {
-	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
 func (m *ExtractSecretResponse) GetSecret() string {
 	if m != nil {
 		return m.Secret
@@ -1351,7 +1246,7 @@ func (m *ExtractSecretResponse) GetErrstr() string {
 
 type AuditRequest struct {
 	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
+	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Contract             string   `protobuf:"bytes,5,opt,name=contract,proto3" json:"contract,omitempty"`
 	ContractTx           uint64   `protobuf:"varint,6,opt,name=contract_tx,json=contractTx,proto3" json:"contract_tx,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1391,11 +1286,11 @@ func (m *AuditRequest) GetCoin() string {
 	return ""
 }
 
-func (m *AuditRequest) GetNet() NetType {
+func (m *AuditRequest) GetTestnet() bool {
 	if m != nil {
-		return m.Net
+		return m.Testnet
 	}
-	return NetType_MAINNET
+	return false
 }
 
 func (m *AuditRequest) GetContract() string {
@@ -1413,11 +1308,9 @@ func (m *AuditRequest) GetContractTx() uint64 {
 }
 
 type AuditResponse struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
-	Net                  NetType  `protobuf:"varint,2,opt,name=net,proto3,enum=protobind.NetType" json:"net,omitempty"`
-	Secrethash           string   `protobuf:"bytes,5,opt,name=secrethash,proto3" json:"secrethash,omitempty"`
+	ContractAmount       int64    `protobuf:"varint,5,opt,name=contract_amount,json=contractAmount,proto3" json:"contract_amount,omitempty"`
 	ContractAddress      string   `protobuf:"bytes,6,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
-	ContractValue        uint64   `protobuf:"varint,7,opt,name=contract_value,json=contractValue,proto3" json:"contract_value,omitempty"`
+	ContractSecrethash   string   `protobuf:"bytes,7,opt,name=contract_secrethash,json=contractSecrethash,proto3" json:"contract_secrethash,omitempty"`
 	RecipientAddress     string   `protobuf:"bytes,8,opt,name=recipient_address,json=recipientAddress,proto3" json:"recipient_address,omitempty"`
 	RefundAddress        string   `protobuf:"bytes,9,opt,name=refund_address,json=refundAddress,proto3" json:"refund_address,omitempty"`
 	RefundLocktime       uint64   `protobuf:"varint,10,opt,name=refund_locktime,json=refundLocktime,proto3" json:"refund_locktime,omitempty"`
@@ -1453,25 +1346,11 @@ func (m *AuditResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AuditResponse proto.InternalMessageInfo
 
-func (m *AuditResponse) GetCoin() string {
+func (m *AuditResponse) GetContractAmount() int64 {
 	if m != nil {
-		return m.Coin
+		return m.ContractAmount
 	}
-	return ""
-}
-
-func (m *AuditResponse) GetNet() NetType {
-	if m != nil {
-		return m.Net
-	}
-	return NetType_MAINNET
-}
-
-func (m *AuditResponse) GetSecrethash() string {
-	if m != nil {
-		return m.Secrethash
-	}
-	return ""
+	return 0
 }
 
 func (m *AuditResponse) GetContractAddress() string {
@@ -1481,11 +1360,11 @@ func (m *AuditResponse) GetContractAddress() string {
 	return ""
 }
 
-func (m *AuditResponse) GetContractValue() uint64 {
+func (m *AuditResponse) GetContractSecrethash() string {
 	if m != nil {
-		return m.ContractValue
+		return m.ContractSecrethash
 	}
-	return 0
+	return ""
 }
 
 func (m *AuditResponse) GetRecipientAddress() string {
@@ -1524,7 +1403,6 @@ func (m *AuditResponse) GetErrstr() string {
 }
 
 func init() {
-	proto.RegisterEnum("protobind.NetType", NetType_name, NetType_value)
 	proto.RegisterType((*PingWalletRpcRequest)(nil), "protobind.PingWalletRpcRequest")
 	proto.RegisterType((*PingWalletRpcResponse)(nil), "protobind.PingWalletRpcResponse")
 	proto.RegisterType((*NewAddressRequest)(nil), "protobind.NewAddressRequest")
@@ -1548,55 +1426,54 @@ func init() {
 func init() { proto.RegisterFile("atomicswap.proto", fileDescriptor_9afe1911bb3b5204) }
 
 var fileDescriptor_9afe1911bb3b5204 = []byte{
-	// 789 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x96, 0xcd, 0x6e, 0xd3, 0x40,
-	0x10, 0xc7, 0xd9, 0x34, 0xf1, 0xc7, 0xa4, 0x71, 0xb6, 0x4b, 0x5b, 0x59, 0x20, 0x41, 0x30, 0x20,
-	0x02, 0x48, 0x3d, 0xc0, 0x13, 0xf4, 0xd0, 0x43, 0x23, 0x88, 0x2a, 0x37, 0x82, 0x63, 0xe5, 0x3a,
-	0x5b, 0x62, 0x91, 0xd8, 0x66, 0xbd, 0xa1, 0xe1, 0x01, 0x38, 0xf1, 0x08, 0x5c, 0x8a, 0x90, 0x38,
-	0xf3, 0x1e, 0xbc, 0x02, 0x0f, 0xd1, 0x03, 0x77, 0xd0, 0xda, 0xbb, 0xce, 0x47, 0xdb, 0x48, 0xc4,
-	0x05, 0xf9, 0x14, 0xcf, 0xac, 0xbd, 0x99, 0xf9, 0xff, 0x66, 0x67, 0x07, 0xb0, 0xc7, 0xa3, 0x51,
-	0xe0, 0x27, 0xa7, 0x5e, 0xbc, 0x13, 0xb3, 0x88, 0x47, 0xc4, 0x4c, 0x7f, 0x8e, 0x83, 0xb0, 0xef,
-	0x7c, 0x43, 0xb0, 0x79, 0x10, 0x84, 0x6f, 0x5e, 0x7b, 0xc3, 0x21, 0xe5, 0x6e, 0xec, 0xbb, 0xf4,
-	0xdd, 0x98, 0x26, 0x9c, 0x10, 0xa8, 0xfa, 0x51, 0x10, 0xda, 0xa8, 0x85, 0xda, 0xa6, 0x9b, 0x3e,
-	0x93, 0x07, 0xb0, 0x16, 0x52, 0x6e, 0x57, 0x5a, 0xa8, 0x6d, 0x3d, 0x23, 0x3b, 0xf9, 0x2e, 0x3b,
-	0x5d, 0xca, 0x7b, 0x1f, 0x62, 0xea, 0x8a, 0x65, 0x72, 0x0b, 0x8c, 0x41, 0x94, 0xf0, 0x38, 0x62,
-	0xdc, 0xae, 0xa5, 0x5f, 0xe7, 0x36, 0xb1, 0x41, 0x67, 0xb1, 0x3f, 0x4e, 0x28, 0xb3, 0xb5, 0x74,
-	0x49, 0x99, 0x72, 0x25, 0xf6, 0x92, 0xc4, 0xd6, 0xf3, 0x15, 0x61, 0x76, 0xaa, 0x86, 0x81, 0xb1,
-	0xf3, 0x15, 0xc1, 0xd6, 0x42, 0xa0, 0x49, 0x1c, 0x85, 0x09, 0x2d, 0x10, 0xa9, 0x0d, 0xba, 0xd7,
-	0xef, 0x33, 0x9a, 0x24, 0x32, 0x50, 0x65, 0x8a, 0x15, 0xca, 0x58, 0xc4, 0xc2, 0xc8, 0xb6, 0x5a,
-	0xa8, 0x5d, 0x73, 0x95, 0x49, 0xb6, 0x41, 0xa3, 0x8c, 0x25, 0x9c, 0xd9, 0xcd, 0xf4, 0x13, 0x69,
-	0x75, 0xaa, 0x86, 0x86, 0x2d, 0x11, 0xe5, 0x46, 0x97, 0x9e, 0xee, 0x66, 0xdb, 0x94, 0x55, 0xcb,
-	0x33, 0x04, 0x64, 0x36, 0xca, 0x12, 0x0a, 0xf9, 0x13, 0x41, 0x73, 0x3f, 0x0c, 0x78, 0xe0, 0x71,
-	0x5a, 0x3a, 0x19, 0xc9, 0x3d, 0x58, 0x8f, 0x3d, 0xc6, 0x8f, 0x54, 0xd2, 0x46, 0xba, 0x5c, 0x17,
-	0x3e, 0x29, 0xaa, 0x48, 0xcf, 0x1b, 0x45, 0xe3, 0x90, 0xdb, 0x66, 0x0b, 0xb5, 0xab, 0xae, 0xb4,
-	0x3a, 0x55, 0x03, 0x30, 0x76, 0x3e, 0x56, 0x00, 0x4f, 0xd3, 0x2b, 0xac, 0xff, 0x36, 0x68, 0x09,
-	0xf5, 0x19, 0x55, 0xd9, 0x49, 0x4b, 0xe4, 0xed, 0x47, 0x21, 0x67, 0x9e, 0xcf, 0x65, 0x72, 0xb9,
-	0x4d, 0xee, 0x42, 0x5d, 0x3d, 0x1f, 0xf1, 0x89, 0xcc, 0x10, 0x94, 0xab, 0x37, 0x21, 0x18, 0xd6,
-	0x4e, 0x28, 0x4d, 0x73, 0xab, 0xba, 0xe2, 0x51, 0x08, 0x72, 0x42, 0x29, 0xf3, 0x38, 0x95, 0x49,
-	0x29, 0x73, 0x25, 0xcc, 0x80, 0x2d, 0xe7, 0x37, 0x02, 0x72, 0xe0, 0x31, 0x1e, 0xf8, 0x41, 0x5c,
-	0x4a, 0xd2, 0x77, 0x00, 0x32, 0x2d, 0x07, 0x5e, 0x32, 0x90, 0x9c, 0x67, 0x3c, 0x17, 0x2a, 0xc1,
-	0x5c, 0x56, 0x09, 0xb0, 0x50, 0x09, 0x75, 0x8c, 0x9d, 0x73, 0x04, 0x37, 0xe7, 0x14, 0x28, 0x5c,
-	0x0c, 0xb3, 0xd0, 0x6b, 0xcb, 0xa1, 0x6b, 0x57, 0x41, 0xd7, 0x2f, 0x85, 0x6e, 0x14, 0x87, 0x6e,
-	0x62, 0xcb, 0xf9, 0x85, 0xa0, 0xe1, 0xd2, 0x3e, 0xa5, 0xa3, 0xf2, 0xf1, 0x9e, 0x9e, 0x24, 0xe3,
-	0xca, 0x93, 0x64, 0x2e, 0x17, 0x35, 0xa3, 0x3c, 0x23, 0xaa, 0x24, 0xfd, 0x03, 0x81, 0xa5, 0xd2,
-	0x2e, 0x0c, 0xf9, 0x36, 0x98, 0x2c, 0xdd, 0x4b, 0xfc, 0xa3, 0x4c, 0x3c, 0x73, 0x4c, 0x21, 0x6a,
-	0x97, 0x42, 0xd4, 0x8b, 0x43, 0x34, 0xb2, 0x06, 0xdd, 0x70, 0xe9, 0xc9, 0x38, 0xec, 0x97, 0x0f,
-	0xe2, 0x2c, 0x2c, 0x63, 0x39, 0x2c, 0xf3, 0x12, 0x58, 0x90, 0xc3, 0xca, 0xd2, 0xbb, 0x1e, 0x58,
-	0x62, 0xaf, 0x39, 0x58, 0xc2, 0xf1, 0x9f, 0x60, 0x7d, 0x47, 0x60, 0x1d, 0x8c, 0x8f, 0x87, 0x41,
-	0x32, 0x28, 0x1f, 0x2d, 0x0b, 0x2a, 0x7c, 0x22, 0x7b, 0x4b, 0x85, 0x4f, 0xd2, 0x26, 0x81, 0x9d,
-	0xcf, 0x08, 0x9a, 0x79, 0xc8, 0xd7, 0x71, 0x41, 0xf2, 0x49, 0xda, 0xc2, 0xe5, 0x05, 0x99, 0x59,
-	0x2b, 0x8f, 0x27, 0x67, 0x08, 0x36, 0xf7, 0x26, 0x69, 0xc9, 0x1c, 0xa6, 0x0d, 0xa2, 0xb8, 0xac,
-	0x6d, 0xc0, 0x7e, 0x7c, 0x24, 0xce, 0xf0, 0x28, 0xe6, 0x41, 0x14, 0x4e, 0x6b, 0xc5, 0xf2, 0x63,
-	0x37, 0x77, 0xf7, 0x26, 0x0b, 0x77, 0x92, 0xb6, 0x78, 0x27, 0x75, 0xaa, 0x86, 0x8e, 0xb1, 0xf3,
-	0x05, 0xc1, 0xd6, 0x42, 0x88, 0xff, 0x6c, 0xce, 0x58, 0x45, 0x46, 0x1d, 0x5b, 0xce, 0x27, 0x04,
-	0xeb, 0xbb, 0xe3, 0x7e, 0xc0, 0xaf, 0xa5, 0x2a, 0xff, 0xe6, 0xd6, 0x5b, 0x3c, 0xf3, 0x42, 0xb1,
-	0xf3, 0x0a, 0x34, 0x64, 0x34, 0x85, 0x95, 0x9a, 0x67, 0x54, 0xbb, 0x30, 0x37, 0x3c, 0x06, 0x9c,
-	0x87, 0xa4, 0x66, 0x87, 0x8c, 0x64, 0x53, 0xf9, 0xd5, 0xfc, 0xf0, 0x10, 0xac, 0xfc, 0xd5, 0xf7,
-	0xde, 0x70, 0xac, 0xba, 0x42, 0x43, 0x79, 0x5f, 0x09, 0x27, 0x79, 0x0a, 0x1b, 0x8c, 0xfa, 0x41,
-	0x1c, 0xd0, 0x70, 0x71, 0x30, 0xc5, 0xf9, 0xc2, 0xcc, 0x9e, 0xb2, 0x23, 0xcd, 0x0f, 0x2e, 0x8d,
-	0xcc, 0xab, 0x5e, 0x7b, 0x04, 0x4d, 0xf9, 0xda, 0x30, 0xf2, 0xdf, 0xf2, 0x60, 0x44, 0xe5, 0xed,
-	0x26, 0xbf, 0x7e, 0x21, 0xbd, 0x2b, 0x15, 0x40, 0x1d, 0x5b, 0x4f, 0xee, 0x83, 0x2e, 0x65, 0x23,
-	0x75, 0xd0, 0x5f, 0xee, 0xee, 0x77, 0xbb, 0x7b, 0x3d, 0x7c, 0x43, 0x18, 0xbd, 0xbd, 0xc3, 0x9e,
-	0x30, 0xd0, 0xb1, 0x96, 0x6a, 0xfc, 0xfc, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x0c, 0xfc, 0xa9,
-	0x2a, 0xc9, 0x0e, 0x00, 0x00,
+	// 780 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x97, 0xdd, 0x6e, 0xd3, 0x4a,
+	0x10, 0xc7, 0xb5, 0x69, 0x93, 0xd8, 0xd3, 0x7c, 0x75, 0xfb, 0x71, 0xac, 0x73, 0xa4, 0x43, 0x30,
+	0xa0, 0x06, 0x21, 0x81, 0x54, 0x9e, 0xa0, 0x17, 0x48, 0x54, 0x42, 0x28, 0x72, 0x2b, 0x71, 0x83,
+	0x14, 0x5c, 0x67, 0x4b, 0x56, 0x24, 0xf6, 0xb2, 0xbb, 0x51, 0xcd, 0x4b, 0x20, 0x21, 0x71, 0xcd,
+	0x3b, 0x20, 0xf1, 0x06, 0xdc, 0xf5, 0x31, 0xb8, 0xe7, 0x19, 0x40, 0xbb, 0xde, 0x75, 0x1c, 0xf7,
+	0x23, 0x34, 0x95, 0x50, 0xae, 0xba, 0x33, 0x3b, 0x6b, 0xcf, 0x7f, 0x7e, 0xb3, 0x9e, 0x06, 0x3a,
+	0xa1, 0x4c, 0x26, 0x34, 0x12, 0x67, 0x21, 0x7b, 0xcc, 0x78, 0x22, 0x13, 0xec, 0xea, 0x3f, 0x27,
+	0x34, 0x1e, 0xfa, 0x9f, 0x11, 0x6c, 0xf7, 0x69, 0xfc, 0xf6, 0x55, 0x38, 0x1e, 0x13, 0x19, 0xb0,
+	0x28, 0x20, 0xef, 0xa7, 0x44, 0x48, 0x8c, 0x61, 0x3d, 0x4a, 0x68, 0xec, 0xa1, 0x2e, 0xea, 0xb9,
+	0x81, 0x5e, 0x63, 0x0f, 0xea, 0x92, 0x08, 0x19, 0x13, 0xe9, 0x55, 0xba, 0xa8, 0xe7, 0x04, 0xd6,
+	0xc4, 0xff, 0x82, 0x33, 0x4a, 0x84, 0x64, 0x09, 0x97, 0x5e, 0x55, 0x9f, 0xc8, 0x6d, 0x75, 0x8a,
+	0xb3, 0x68, 0x2a, 0x08, 0xf7, 0x6a, 0x7a, 0xcb, 0x9a, 0x66, 0x87, 0x85, 0x42, 0x78, 0xf5, 0x7c,
+	0x47, 0x99, 0xfe, 0x21, 0xec, 0x94, 0xb2, 0x12, 0x2c, 0x89, 0x05, 0x51, 0x47, 0x08, 0xe7, 0x09,
+	0x8f, 0x13, 0xaf, 0xd5, 0x45, 0xbd, 0x6a, 0x60, 0x4d, 0xbc, 0x0b, 0x35, 0xc2, 0xb9, 0x90, 0xdc,
+	0x6b, 0xeb, 0x67, 0x19, 0xcb, 0xff, 0x84, 0x60, 0xf3, 0x25, 0x39, 0x3b, 0x18, 0x0e, 0x39, 0x11,
+	0x62, 0x35, 0xe4, 0xbd, 0x01, 0x5c, 0x4c, 0x69, 0xa6, 0x2d, 0xcc, 0x5c, 0xe6, 0x25, 0xd6, 0x5c,
+	0x42, 0xf5, 0x39, 0x82, 0xf6, 0x61, 0x4c, 0x25, 0x0d, 0x25, 0x59, 0x09, 0xcd, 0xf8, 0x2e, 0x34,
+	0x58, 0xc8, 0xe5, 0xc0, 0x4a, 0x74, 0xf4, 0xf6, 0x86, 0xf2, 0x99, 0x42, 0x28, 0x31, 0xe1, 0x24,
+	0x99, 0xc6, 0xd2, 0x73, 0xbb, 0xa8, 0xb7, 0x16, 0x18, 0xcb, 0xff, 0x56, 0x81, 0xce, 0x4c, 0x8c,
+	0xa9, 0xd6, 0x2e, 0xd4, 0x04, 0x89, 0x38, 0xb1, 0xd9, 0x19, 0x0b, 0xff, 0x0f, 0x90, 0xad, 0x46,
+	0xa1, 0x18, 0x99, 0xf4, 0x0a, 0x1e, 0xa5, 0x2b, 0x4a, 0x62, 0xc9, 0xc3, 0x48, 0x9a, 0x14, 0x73,
+	0x1b, 0xdf, 0x83, 0xa6, 0x5d, 0x0f, 0xd8, 0xbe, 0x18, 0x99, 0x24, 0x1b, 0xd6, 0xd9, 0xdf, 0x17,
+	0x23, 0x7c, 0x07, 0x36, 0xf2, 0x20, 0x99, 0xea, 0x54, 0xdd, 0x00, 0xac, 0xeb, 0x38, 0xc5, 0x3d,
+	0xe8, 0x14, 0x02, 0x06, 0x3a, 0x0f, 0xd0, 0x51, 0xad, 0x59, 0xd4, 0x73, 0x95, 0x4b, 0x07, 0xd6,
+	0x4e, 0x09, 0xf1, 0x36, 0xb4, 0x5a, 0xb5, 0x54, 0xf5, 0x3b, 0x25, 0x84, 0x87, 0x92, 0x78, 0x8d,
+	0x2e, 0xea, 0x55, 0x02, 0x6b, 0x2e, 0xd1, 0x03, 0x3f, 0x11, 0xe0, 0x7e, 0xc8, 0x25, 0x8d, 0x28,
+	0x5b, 0x99, 0x36, 0x98, 0xc7, 0xe3, 0x5c, 0xc0, 0x53, 0x6e, 0x13, 0xf7, 0xba, 0x36, 0x81, 0xb9,
+	0x36, 0xf9, 0x85, 0x60, 0x6b, 0x4e, 0xaf, 0xe9, 0x94, 0x22, 0xf1, 0xea, 0x22, 0xe2, 0xb5, 0xc5,
+	0xc4, 0xeb, 0x7f, 0x44, 0xdc, 0xb9, 0x8e, 0xb8, 0x7b, 0x29, 0x71, 0xb8, 0x2d, 0xf1, 0x1f, 0x08,
+	0x9a, 0x01, 0x19, 0x12, 0x32, 0x59, 0x0d, 0xd8, 0xb3, 0x3b, 0xea, 0xcc, 0xdd, 0xd1, 0x22, 0x11,
+	0xb7, 0x44, 0xa4, 0x54, 0x6c, 0x55, 0x93, 0xf5, 0x62, 0xb1, 0xfd, 0xaf, 0x08, 0x5a, 0x56, 0xa4,
+	0x21, 0xfc, 0x1f, 0xb8, 0x5c, 0x7b, 0xd4, 0x09, 0x93, 0x78, 0xe6, 0x38, 0x4e, 0xf1, 0x7d, 0x68,
+	0xe5, 0x9b, 0x83, 0xc2, 0x47, 0xa1, 0x61, 0x23, 0x8a, 0x60, 0xea, 0x97, 0x82, 0x71, 0x6e, 0x0b,
+	0xe6, 0x5c, 0x83, 0x39, 0x9d, 0xc6, 0xc3, 0xd5, 0x00, 0x53, 0x04, 0xe0, 0x5c, 0x0f, 0xc0, 0xbd,
+	0x02, 0x40, 0x26, 0xa6, 0x08, 0x40, 0x79, 0xe6, 0x00, 0x28, 0x87, 0x05, 0x60, 0x36, 0x4b, 0x00,
+	0xb2, 0x88, 0xbf, 0x00, 0xe0, 0x0b, 0x82, 0x56, 0x7f, 0x7a, 0x32, 0xa6, 0x62, 0xb4, 0x1a, 0x04,
+	0x5a, 0x50, 0x91, 0xa9, 0xa9, 0x7d, 0x45, 0xa6, 0xfe, 0x6b, 0x68, 0xe7, 0xf9, 0x99, 0xa2, 0xfe,
+	0x03, 0x75, 0x5b, 0x30, 0x33, 0xe2, 0x64, 0x56, 0xaa, 0x9b, 0xcb, 0xff, 0x88, 0x60, 0xfb, 0x59,
+	0xaa, 0x01, 0x1e, 0xe9, 0x2b, 0xb8, 0x5c, 0x11, 0xd4, 0x77, 0x8e, 0x0d, 0xd4, 0xbd, 0x99, 0x30,
+	0x49, 0x93, 0x78, 0x46, 0xbb, 0x15, 0xb1, 0x20, 0x77, 0x1f, 0xa7, 0x8b, 0xa6, 0xb0, 0x1f, 0xc2,
+	0x4e, 0x29, 0x9f, 0x05, 0x63, 0xfd, 0xe6, 0x9a, 0x3f, 0x40, 0xe3, 0x60, 0x3a, 0xa4, 0x72, 0x69,
+	0xde, 0x57, 0x0e, 0x8d, 0xd2, 0x0d, 0xa9, 0x5d, 0xb8, 0x21, 0xdf, 0x2b, 0xd0, 0x34, 0xef, 0x36,
+	0xb2, 0xf6, 0xa0, 0x9d, 0x1f, 0x31, 0xc3, 0xab, 0xaa, 0x3b, 0x3d, 0x1f, 0x10, 0x07, 0xda, 0x8b,
+	0x1f, 0x16, 0x46, 0x89, 0x9d, 0x81, 0x59, 0xf9, 0xf2, 0x07, 0xd8, 0x39, 0xf8, 0x04, 0xb6, 0xf2,
+	0xd0, 0x42, 0xb1, 0xb3, 0x46, 0xc3, 0x76, 0xeb, 0x68, 0x36, 0x5b, 0x1f, 0xc1, 0x26, 0x27, 0x11,
+	0x65, 0x94, 0xc4, 0xe5, 0xff, 0xc3, 0x3a, 0xf9, 0x86, 0x7d, 0xfa, 0x83, 0xfc, 0xd6, 0xce, 0x8f,
+	0xe2, 0x66, 0xe6, 0xb5, 0x61, 0x7b, 0xd0, 0x36, 0x61, 0xe3, 0x24, 0x7a, 0x27, 0xe9, 0x84, 0x98,
+	0x4f, 0xb6, 0x39, 0xfd, 0xc2, 0x78, 0x6f, 0x0e, 0xf0, 0xa4, 0xa6, 0x7f, 0xa6, 0x3c, 0xfd, 0x1d,
+	0x00, 0x00, 0xff, 0xff, 0xdf, 0x36, 0xb7, 0xef, 0xc1, 0x0c, 0x00, 0x00,
 }

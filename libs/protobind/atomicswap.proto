@@ -6,120 +6,89 @@
 syntax = "proto3";
 package protobind;
 
-enum NetType {
-	MAINNET = 0;
-	TESTNET = 1;	
-}
-
 message PingWalletRpcRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string hostport = 5;	// default localhost
 	string rpcuser = 6;
 	string rpcpass = 7;
-
-	reserved 8 to 15;
 }
 
 message PingWalletRpcResponse {
-	string coin = 1;
-	NetType net = 2;
-
-	string address = 5;
-
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 6 to 13;
 }
 
 message NewAddressRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string hostport = 5;	// default localhost
 	string rpcuser = 6;
 	string rpcpass = 7;
-
-	reserved 8 to 15;
 }
 
 message NewAddressResponse {
-	string coin = 1;
-	NetType net = 2;
-
 	string address = 5;
-
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 6 to 13;
 }
 
 message InitiateRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
 
 	string part_address = 8;
-	uint64 amount = 9;		// "satoshis"
-
-	reserved 10 to 15;
+	int64 amount = 9;		// "satoshis"
 }
 
 message InitiateResponse {
-	string coin = 1;
-	NetType net = 2;
-
 	string secret = 5;
-	string contract = 6;
-	string contract_tx = 7;
-	uint64 fee = 8;
-	uint64 feerate = 9;
+	string secrethash = 6;
+	string contract = 7;
+	string contract_p2sh = 8;
+	string contract_tx = 9;
+	string contract_tx_hash = 10;
+	int64 fee = 11;
+	float feerate = 12;
 
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 10 to 13;
 }
 
 message ParticipateRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
 
-	string secrethash = 8;	
+	string secrethash = 8;
 	string part_address = 9;
-	uint64 amount = 10;		// "satoshis"
-
-	reserved 11 to 15;
+	int64 amount = 10;		// "satoshis"
 }
 
 message ParticipateResponse {
-	string coin = 1;
-	NetType net = 2;
-
 	string contract = 5;
-	string contract_tx = 6;
-	uint64 fee = 7;
-	uint64 feerate = 8;
+	string contract_p2sh = 6;
+	string contract_tx = 7;
+	string contract_tx_hash = 8;
+	int64 fee = 9;
+	float feerate = 10;
 
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 9 to 13;
 }
 
 message RedeemRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
@@ -128,27 +97,21 @@ message RedeemRequest {
 	string secret = 8;	
 	string contract = 9;
 	uint64 contract_tx = 10;
-
-	reserved 11 to 15;
 }
 
 message RedeemResponse {
-	string coin = 1;
-	NetType net = 2;
-
 	string redeem_tx = 5;
-	uint64 fee = 6;
-	uint64 feerate = 7;
+	string redeem_tx_hash = 6;
+	int64 fee = 7;
+	float feerate = 8;
 
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 8 to 13;
 }
 
 message RefundRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
@@ -156,96 +119,69 @@ message RefundRequest {
 
 	string contract = 8;
 	uint64 contract_tx = 9;
-
-	reserved 10 to 15;
 }
 
 message RefundResponse {
-	string coin = 1;
-	NetType net = 2;
-
 	string refund_tx = 5;
-	uint64 fee = 6;
-	uint64 feerate = 7;
+	string refund_tx_hash = 6;
+	int64 fee = 7;
+	float feerate = 8;
 
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 8 to 13;
 }
 
 message PublishRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
 
-	uint64 tx = 8;
-
-	reserved 9 to 15;
+	string tx = 8;
 }
 
 message PublishResponse {
-	string coin = 1;
-	NetType net = 2;
-
-	string txhash = 5;
+	string tx_hash = 5;
 
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 6 to 13;
 }
 
 message ExtractSecretRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string cp_redemption_tx = 5;
 	string secrethash = 6;
-
-	reserved 7 to 15;
 }
 
 message ExtractSecretResponse {
-	string coin = 1;
-	NetType net = 2;
-
 	string secret = 5;
 
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 7 to 13;
 }
 
 message AuditRequest {
 	string coin = 1;
-	NetType net = 2;
+	bool testnet = 2;
 
 	string contract = 5;
 	uint64 contract_tx = 6;
-
-	reserved 7 to 15;
 }
 
 message AuditResponse {
-	string coin = 1;
-	NetType net = 2;
-
-	string secrethash = 5;
+	int64 contract_amount = 5;	// satoshis
 	string contract_address = 6;
-	uint64 contract_value = 7;	// satoshis
+	string contract_secrethash = 7;
 	string recipient_address = 8;
 	string refund_address = 9;
 	uint64 refund_locktime = 10;
 
 	int32 errorno = 14;
 	string errstr = 15;
-
-	reserved 11 to 13;
 }
 
 //TODO: Define service and implement golang side server so other bindings can access as client
