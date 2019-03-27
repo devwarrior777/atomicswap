@@ -4,8 +4,10 @@
 package protobind
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
 	math "math"
 )
 
@@ -20,8 +22,39 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type PingWalletRpcRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+//
+// Shared with dragon - keep coins in sync
+//
+type COIN int32
+
+const (
+	COIN_BTC COIN = 0
+	COIN_LTC COIN = 1
+	COIN_XZC COIN = 2
+)
+
+var COIN_name = map[int32]string{
+	0: "BTC",
+	1: "LTC",
+	2: "XZC",
+}
+
+var COIN_value = map[string]int32{
+	"BTC": 0,
+	"LTC": 1,
+	"XZC": 2,
+}
+
+func (x COIN) String() string {
+	return proto.EnumName(COIN_name, int32(x))
+}
+
+func (COIN) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_9afe1911bb3b5204, []int{0}
+}
+
+type PingWalletRPCRequest struct {
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
@@ -31,67 +64,67 @@ type PingWalletRpcRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *PingWalletRpcRequest) Reset()         { *m = PingWalletRpcRequest{} }
-func (m *PingWalletRpcRequest) String() string { return proto.CompactTextString(m) }
-func (*PingWalletRpcRequest) ProtoMessage()    {}
-func (*PingWalletRpcRequest) Descriptor() ([]byte, []int) {
+func (m *PingWalletRPCRequest) Reset()         { *m = PingWalletRPCRequest{} }
+func (m *PingWalletRPCRequest) String() string { return proto.CompactTextString(m) }
+func (*PingWalletRPCRequest) ProtoMessage()    {}
+func (*PingWalletRPCRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9afe1911bb3b5204, []int{0}
 }
 
-func (m *PingWalletRpcRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PingWalletRpcRequest.Unmarshal(m, b)
+func (m *PingWalletRPCRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PingWalletRPCRequest.Unmarshal(m, b)
 }
-func (m *PingWalletRpcRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PingWalletRpcRequest.Marshal(b, m, deterministic)
+func (m *PingWalletRPCRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PingWalletRPCRequest.Marshal(b, m, deterministic)
 }
-func (m *PingWalletRpcRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PingWalletRpcRequest.Merge(m, src)
+func (m *PingWalletRPCRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PingWalletRPCRequest.Merge(m, src)
 }
-func (m *PingWalletRpcRequest) XXX_Size() int {
-	return xxx_messageInfo_PingWalletRpcRequest.Size(m)
+func (m *PingWalletRPCRequest) XXX_Size() int {
+	return xxx_messageInfo_PingWalletRPCRequest.Size(m)
 }
-func (m *PingWalletRpcRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_PingWalletRpcRequest.DiscardUnknown(m)
+func (m *PingWalletRPCRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_PingWalletRPCRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_PingWalletRpcRequest proto.InternalMessageInfo
+var xxx_messageInfo_PingWalletRPCRequest proto.InternalMessageInfo
 
-func (m *PingWalletRpcRequest) GetCoin() string {
+func (m *PingWalletRPCRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
-func (m *PingWalletRpcRequest) GetTestnet() bool {
+func (m *PingWalletRPCRequest) GetTestnet() bool {
 	if m != nil {
 		return m.Testnet
 	}
 	return false
 }
 
-func (m *PingWalletRpcRequest) GetHostport() string {
+func (m *PingWalletRPCRequest) GetHostport() string {
 	if m != nil {
 		return m.Hostport
 	}
 	return ""
 }
 
-func (m *PingWalletRpcRequest) GetRpcuser() string {
+func (m *PingWalletRPCRequest) GetRpcuser() string {
 	if m != nil {
 		return m.Rpcuser
 	}
 	return ""
 }
 
-func (m *PingWalletRpcRequest) GetRpcpass() string {
+func (m *PingWalletRPCRequest) GetRpcpass() string {
 	if m != nil {
 		return m.Rpcpass
 	}
 	return ""
 }
 
-type PingWalletRpcResponse struct {
+type PingWalletRPCResponse struct {
 	Errorno              int32    `protobuf:"varint,14,opt,name=errorno,proto3" json:"errorno,omitempty"`
 	Errstr               string   `protobuf:"bytes,15,opt,name=errstr,proto3" json:"errstr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -99,39 +132,39 @@ type PingWalletRpcResponse struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *PingWalletRpcResponse) Reset()         { *m = PingWalletRpcResponse{} }
-func (m *PingWalletRpcResponse) String() string { return proto.CompactTextString(m) }
-func (*PingWalletRpcResponse) ProtoMessage()    {}
-func (*PingWalletRpcResponse) Descriptor() ([]byte, []int) {
+func (m *PingWalletRPCResponse) Reset()         { *m = PingWalletRPCResponse{} }
+func (m *PingWalletRPCResponse) String() string { return proto.CompactTextString(m) }
+func (*PingWalletRPCResponse) ProtoMessage()    {}
+func (*PingWalletRPCResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9afe1911bb3b5204, []int{1}
 }
 
-func (m *PingWalletRpcResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PingWalletRpcResponse.Unmarshal(m, b)
+func (m *PingWalletRPCResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PingWalletRPCResponse.Unmarshal(m, b)
 }
-func (m *PingWalletRpcResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PingWalletRpcResponse.Marshal(b, m, deterministic)
+func (m *PingWalletRPCResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PingWalletRPCResponse.Marshal(b, m, deterministic)
 }
-func (m *PingWalletRpcResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PingWalletRpcResponse.Merge(m, src)
+func (m *PingWalletRPCResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PingWalletRPCResponse.Merge(m, src)
 }
-func (m *PingWalletRpcResponse) XXX_Size() int {
-	return xxx_messageInfo_PingWalletRpcResponse.Size(m)
+func (m *PingWalletRPCResponse) XXX_Size() int {
+	return xxx_messageInfo_PingWalletRPCResponse.Size(m)
 }
-func (m *PingWalletRpcResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_PingWalletRpcResponse.DiscardUnknown(m)
+func (m *PingWalletRPCResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_PingWalletRPCResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_PingWalletRpcResponse proto.InternalMessageInfo
+var xxx_messageInfo_PingWalletRPCResponse proto.InternalMessageInfo
 
-func (m *PingWalletRpcResponse) GetErrorno() int32 {
+func (m *PingWalletRPCResponse) GetErrorno() int32 {
 	if m != nil {
 		return m.Errorno
 	}
 	return 0
 }
 
-func (m *PingWalletRpcResponse) GetErrstr() string {
+func (m *PingWalletRPCResponse) GetErrstr() string {
 	if m != nil {
 		return m.Errstr
 	}
@@ -139,7 +172,7 @@ func (m *PingWalletRpcResponse) GetErrstr() string {
 }
 
 type NewAddressRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
@@ -174,11 +207,11 @@ func (m *NewAddressRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_NewAddressRequest proto.InternalMessageInfo
 
-func (m *NewAddressRequest) GetCoin() string {
+func (m *NewAddressRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *NewAddressRequest) GetTestnet() bool {
@@ -265,7 +298,7 @@ func (m *NewAddressResponse) GetErrstr() string {
 }
 
 type InitiateRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
@@ -302,11 +335,11 @@ func (m *InitiateRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_InitiateRequest proto.InternalMessageInfo
 
-func (m *InitiateRequest) GetCoin() string {
+func (m *InitiateRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *InitiateRequest) GetTestnet() bool {
@@ -463,7 +496,7 @@ func (m *InitiateResponse) GetErrstr() string {
 }
 
 type ParticipateRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
@@ -501,11 +534,11 @@ func (m *ParticipateRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ParticipateRequest proto.InternalMessageInfo
 
-func (m *ParticipateRequest) GetCoin() string {
+func (m *ParticipateRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *ParticipateRequest) GetTestnet() bool {
@@ -653,7 +686,7 @@ func (m *ParticipateResponse) GetErrstr() string {
 }
 
 type RedeemRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
@@ -691,11 +724,11 @@ func (m *RedeemRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RedeemRequest proto.InternalMessageInfo
 
-func (m *RedeemRequest) GetCoin() string {
+func (m *RedeemRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *RedeemRequest) GetTestnet() bool {
@@ -827,7 +860,7 @@ func (m *RedeemResponse) GetErrstr() string {
 }
 
 type RefundRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
@@ -864,11 +897,11 @@ func (m *RefundRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RefundRequest proto.InternalMessageInfo
 
-func (m *RefundRequest) GetCoin() string {
+func (m *RefundRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *RefundRequest) GetTestnet() bool {
@@ -993,7 +1026,7 @@ func (m *RefundResponse) GetErrstr() string {
 }
 
 type PublishRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Hostport             string   `protobuf:"bytes,5,opt,name=hostport,proto3" json:"hostport,omitempty"`
 	Rpcuser              string   `protobuf:"bytes,6,opt,name=rpcuser,proto3" json:"rpcuser,omitempty"`
@@ -1029,11 +1062,11 @@ func (m *PublishRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_PublishRequest proto.InternalMessageInfo
 
-func (m *PublishRequest) GetCoin() string {
+func (m *PublishRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *PublishRequest) GetTestnet() bool {
@@ -1127,7 +1160,7 @@ func (m *PublishResponse) GetErrstr() string {
 }
 
 type ExtractSecretRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	CpRedemptionTx       string   `protobuf:"bytes,5,opt,name=cp_redemption_tx,json=cpRedemptionTx,proto3" json:"cp_redemption_tx,omitempty"`
 	Secrethash           string   `protobuf:"bytes,6,opt,name=secrethash,proto3" json:"secrethash,omitempty"`
@@ -1161,11 +1194,11 @@ func (m *ExtractSecretRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ExtractSecretRequest proto.InternalMessageInfo
 
-func (m *ExtractSecretRequest) GetCoin() string {
+func (m *ExtractSecretRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *ExtractSecretRequest) GetTestnet() bool {
@@ -1245,7 +1278,7 @@ func (m *ExtractSecretResponse) GetErrstr() string {
 }
 
 type AuditRequest struct {
-	Coin                 string   `protobuf:"bytes,1,opt,name=coin,proto3" json:"coin,omitempty"`
+	Coin                 COIN     `protobuf:"varint,1,opt,name=coin,proto3,enum=protobind.COIN" json:"coin,omitempty"`
 	Testnet              bool     `protobuf:"varint,2,opt,name=testnet,proto3" json:"testnet,omitempty"`
 	Contract             string   `protobuf:"bytes,5,opt,name=contract,proto3" json:"contract,omitempty"`
 	ContractTx           uint64   `protobuf:"varint,6,opt,name=contract_tx,json=contractTx,proto3" json:"contract_tx,omitempty"`
@@ -1279,11 +1312,11 @@ func (m *AuditRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AuditRequest proto.InternalMessageInfo
 
-func (m *AuditRequest) GetCoin() string {
+func (m *AuditRequest) GetCoin() COIN {
 	if m != nil {
 		return m.Coin
 	}
-	return ""
+	return COIN_BTC
 }
 
 func (m *AuditRequest) GetTestnet() bool {
@@ -1403,8 +1436,9 @@ func (m *AuditResponse) GetErrstr() string {
 }
 
 func init() {
-	proto.RegisterType((*PingWalletRpcRequest)(nil), "protobind.PingWalletRpcRequest")
-	proto.RegisterType((*PingWalletRpcResponse)(nil), "protobind.PingWalletRpcResponse")
+	proto.RegisterEnum("protobind.COIN", COIN_name, COIN_value)
+	proto.RegisterType((*PingWalletRPCRequest)(nil), "protobind.PingWalletRPCRequest")
+	proto.RegisterType((*PingWalletRPCResponse)(nil), "protobind.PingWalletRPCResponse")
 	proto.RegisterType((*NewAddressRequest)(nil), "protobind.NewAddressRequest")
 	proto.RegisterType((*NewAddressResponse)(nil), "protobind.NewAddressResponse")
 	proto.RegisterType((*InitiateRequest)(nil), "protobind.InitiateRequest")
@@ -1426,54 +1460,403 @@ func init() {
 func init() { proto.RegisterFile("atomicswap.proto", fileDescriptor_9afe1911bb3b5204) }
 
 var fileDescriptor_9afe1911bb3b5204 = []byte{
-	// 780 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x97, 0xdd, 0x6e, 0xd3, 0x4a,
-	0x10, 0xc7, 0xb5, 0x69, 0x93, 0xd8, 0xd3, 0x7c, 0x75, 0xfb, 0x71, 0xac, 0x73, 0xa4, 0x43, 0x30,
-	0xa0, 0x06, 0x21, 0x81, 0x54, 0x9e, 0xa0, 0x17, 0x48, 0x54, 0x42, 0x28, 0x72, 0x2b, 0x71, 0x83,
-	0x14, 0x5c, 0x67, 0x4b, 0x56, 0x24, 0xf6, 0xb2, 0xbb, 0x51, 0xcd, 0x4b, 0x20, 0x21, 0x71, 0xcd,
-	0x3b, 0x20, 0xf1, 0x06, 0xdc, 0xf5, 0x31, 0xb8, 0xe7, 0x19, 0x40, 0xbb, 0xde, 0x75, 0x1c, 0xf7,
-	0x23, 0x34, 0x95, 0x50, 0xae, 0xba, 0x33, 0x3b, 0x6b, 0xcf, 0x7f, 0x7e, 0xb3, 0x9e, 0x06, 0x3a,
-	0xa1, 0x4c, 0x26, 0x34, 0x12, 0x67, 0x21, 0x7b, 0xcc, 0x78, 0x22, 0x13, 0xec, 0xea, 0x3f, 0x27,
-	0x34, 0x1e, 0xfa, 0x9f, 0x11, 0x6c, 0xf7, 0x69, 0xfc, 0xf6, 0x55, 0x38, 0x1e, 0x13, 0x19, 0xb0,
-	0x28, 0x20, 0xef, 0xa7, 0x44, 0x48, 0x8c, 0x61, 0x3d, 0x4a, 0x68, 0xec, 0xa1, 0x2e, 0xea, 0xb9,
-	0x81, 0x5e, 0x63, 0x0f, 0xea, 0x92, 0x08, 0x19, 0x13, 0xe9, 0x55, 0xba, 0xa8, 0xe7, 0x04, 0xd6,
-	0xc4, 0xff, 0x82, 0x33, 0x4a, 0x84, 0x64, 0x09, 0x97, 0x5e, 0x55, 0x9f, 0xc8, 0x6d, 0x75, 0x8a,
-	0xb3, 0x68, 0x2a, 0x08, 0xf7, 0x6a, 0x7a, 0xcb, 0x9a, 0x66, 0x87, 0x85, 0x42, 0x78, 0xf5, 0x7c,
-	0x47, 0x99, 0xfe, 0x21, 0xec, 0x94, 0xb2, 0x12, 0x2c, 0x89, 0x05, 0x51, 0x47, 0x08, 0xe7, 0x09,
-	0x8f, 0x13, 0xaf, 0xd5, 0x45, 0xbd, 0x6a, 0x60, 0x4d, 0xbc, 0x0b, 0x35, 0xc2, 0xb9, 0x90, 0xdc,
-	0x6b, 0xeb, 0x67, 0x19, 0xcb, 0xff, 0x84, 0x60, 0xf3, 0x25, 0x39, 0x3b, 0x18, 0x0e, 0x39, 0x11,
-	0x62, 0x35, 0xe4, 0xbd, 0x01, 0x5c, 0x4c, 0x69, 0xa6, 0x2d, 0xcc, 0x5c, 0xe6, 0x25, 0xd6, 0x5c,
-	0x42, 0xf5, 0x39, 0x82, 0xf6, 0x61, 0x4c, 0x25, 0x0d, 0x25, 0x59, 0x09, 0xcd, 0xf8, 0x2e, 0x34,
-	0x58, 0xc8, 0xe5, 0xc0, 0x4a, 0x74, 0xf4, 0xf6, 0x86, 0xf2, 0x99, 0x42, 0x28, 0x31, 0xe1, 0x24,
-	0x99, 0xc6, 0xd2, 0x73, 0xbb, 0xa8, 0xb7, 0x16, 0x18, 0xcb, 0xff, 0x56, 0x81, 0xce, 0x4c, 0x8c,
-	0xa9, 0xd6, 0x2e, 0xd4, 0x04, 0x89, 0x38, 0xb1, 0xd9, 0x19, 0x0b, 0xff, 0x0f, 0x90, 0xad, 0x46,
-	0xa1, 0x18, 0x99, 0xf4, 0x0a, 0x1e, 0xa5, 0x2b, 0x4a, 0x62, 0xc9, 0xc3, 0x48, 0x9a, 0x14, 0x73,
-	0x1b, 0xdf, 0x83, 0xa6, 0x5d, 0x0f, 0xd8, 0xbe, 0x18, 0x99, 0x24, 0x1b, 0xd6, 0xd9, 0xdf, 0x17,
-	0x23, 0x7c, 0x07, 0x36, 0xf2, 0x20, 0x99, 0xea, 0x54, 0xdd, 0x00, 0xac, 0xeb, 0x38, 0xc5, 0x3d,
-	0xe8, 0x14, 0x02, 0x06, 0x3a, 0x0f, 0xd0, 0x51, 0xad, 0x59, 0xd4, 0x73, 0x95, 0x4b, 0x07, 0xd6,
-	0x4e, 0x09, 0xf1, 0x36, 0xb4, 0x5a, 0xb5, 0x54, 0xf5, 0x3b, 0x25, 0x84, 0x87, 0x92, 0x78, 0x8d,
-	0x2e, 0xea, 0x55, 0x02, 0x6b, 0x2e, 0xd1, 0x03, 0x3f, 0x11, 0xe0, 0x7e, 0xc8, 0x25, 0x8d, 0x28,
-	0x5b, 0x99, 0x36, 0x98, 0xc7, 0xe3, 0x5c, 0xc0, 0x53, 0x6e, 0x13, 0xf7, 0xba, 0x36, 0x81, 0xb9,
-	0x36, 0xf9, 0x85, 0x60, 0x6b, 0x4e, 0xaf, 0xe9, 0x94, 0x22, 0xf1, 0xea, 0x22, 0xe2, 0xb5, 0xc5,
-	0xc4, 0xeb, 0x7f, 0x44, 0xdc, 0xb9, 0x8e, 0xb8, 0x7b, 0x29, 0x71, 0xb8, 0x2d, 0xf1, 0x1f, 0x08,
-	0x9a, 0x01, 0x19, 0x12, 0x32, 0x59, 0x0d, 0xd8, 0xb3, 0x3b, 0xea, 0xcc, 0xdd, 0xd1, 0x22, 0x11,
-	0xb7, 0x44, 0xa4, 0x54, 0x6c, 0x55, 0x93, 0xf5, 0x62, 0xb1, 0xfd, 0xaf, 0x08, 0x5a, 0x56, 0xa4,
-	0x21, 0xfc, 0x1f, 0xb8, 0x5c, 0x7b, 0xd4, 0x09, 0x93, 0x78, 0xe6, 0x38, 0x4e, 0xf1, 0x7d, 0x68,
-	0xe5, 0x9b, 0x83, 0xc2, 0x47, 0xa1, 0x61, 0x23, 0x8a, 0x60, 0xea, 0x97, 0x82, 0x71, 0x6e, 0x0b,
-	0xe6, 0x5c, 0x83, 0x39, 0x9d, 0xc6, 0xc3, 0xd5, 0x00, 0x53, 0x04, 0xe0, 0x5c, 0x0f, 0xc0, 0xbd,
-	0x02, 0x40, 0x26, 0xa6, 0x08, 0x40, 0x79, 0xe6, 0x00, 0x28, 0x87, 0x05, 0x60, 0x36, 0x4b, 0x00,
-	0xb2, 0x88, 0xbf, 0x00, 0xe0, 0x0b, 0x82, 0x56, 0x7f, 0x7a, 0x32, 0xa6, 0x62, 0xb4, 0x1a, 0x04,
-	0x5a, 0x50, 0x91, 0xa9, 0xa9, 0x7d, 0x45, 0xa6, 0xfe, 0x6b, 0x68, 0xe7, 0xf9, 0x99, 0xa2, 0xfe,
-	0x03, 0x75, 0x5b, 0x30, 0x33, 0xe2, 0x64, 0x56, 0xaa, 0x9b, 0xcb, 0xff, 0x88, 0x60, 0xfb, 0x59,
-	0xaa, 0x01, 0x1e, 0xe9, 0x2b, 0xb8, 0x5c, 0x11, 0xd4, 0x77, 0x8e, 0x0d, 0xd4, 0xbd, 0x99, 0x30,
-	0x49, 0x93, 0x78, 0x46, 0xbb, 0x15, 0xb1, 0x20, 0x77, 0x1f, 0xa7, 0x8b, 0xa6, 0xb0, 0x1f, 0xc2,
-	0x4e, 0x29, 0x9f, 0x05, 0x63, 0xfd, 0xe6, 0x9a, 0x3f, 0x40, 0xe3, 0x60, 0x3a, 0xa4, 0x72, 0x69,
-	0xde, 0x57, 0x0e, 0x8d, 0xd2, 0x0d, 0xa9, 0x5d, 0xb8, 0x21, 0xdf, 0x2b, 0xd0, 0x34, 0xef, 0x36,
-	0xb2, 0xf6, 0xa0, 0x9d, 0x1f, 0x31, 0xc3, 0xab, 0xaa, 0x3b, 0x3d, 0x1f, 0x10, 0x07, 0xda, 0x8b,
-	0x1f, 0x16, 0x46, 0x89, 0x9d, 0x81, 0x59, 0xf9, 0xf2, 0x07, 0xd8, 0x39, 0xf8, 0x04, 0xb6, 0xf2,
-	0xd0, 0x42, 0xb1, 0xb3, 0x46, 0xc3, 0x76, 0xeb, 0x68, 0x36, 0x5b, 0x1f, 0xc1, 0x26, 0x27, 0x11,
-	0x65, 0x94, 0xc4, 0xe5, 0xff, 0xc3, 0x3a, 0xf9, 0x86, 0x7d, 0xfa, 0x83, 0xfc, 0xd6, 0xce, 0x8f,
-	0xe2, 0x66, 0xe6, 0xb5, 0x61, 0x7b, 0xd0, 0x36, 0x61, 0xe3, 0x24, 0x7a, 0x27, 0xe9, 0x84, 0x98,
-	0x4f, 0xb6, 0x39, 0xfd, 0xc2, 0x78, 0x6f, 0x0e, 0xf0, 0xa4, 0xa6, 0x7f, 0xa6, 0x3c, 0xfd, 0x1d,
-	0x00, 0x00, 0xff, 0xff, 0xdf, 0x36, 0xb7, 0xef, 0xc1, 0x0c, 0x00, 0x00,
+	// 982 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x57, 0xdd, 0x8a, 0x23, 0x45,
+	0x14, 0xb6, 0x32, 0x93, 0xa4, 0xfb, 0x4c, 0x7e, 0x7a, 0x6b, 0xff, 0xda, 0x5e, 0xdd, 0xcd, 0x66,
+	0x95, 0x8d, 0x0a, 0x23, 0x8c, 0x77, 0x82, 0xe0, 0x18, 0x04, 0x07, 0x86, 0x35, 0xf4, 0x04, 0x14,
+	0x11, 0x62, 0x4f, 0xa7, 0xc6, 0x34, 0x4e, 0xba, 0xdb, 0xaa, 0x0a, 0x93, 0x67, 0xd0, 0x87, 0x10,
+	0x04, 0xaf, 0x45, 0xf0, 0x0d, 0x7c, 0x8c, 0x7d, 0x0c, 0xef, 0x55, 0xaa, 0xba, 0xaa, 0x53, 0xdd,
+	0xe9, 0x4c, 0x9c, 0xdd, 0x65, 0xc9, 0x55, 0xfa, 0xfc, 0x55, 0xce, 0x39, 0xdf, 0xf9, 0xa9, 0x02,
+	0x27, 0xe0, 0xc9, 0x3c, 0x0a, 0xd9, 0x55, 0x90, 0x1e, 0xa6, 0x34, 0xe1, 0x09, 0xb6, 0xe5, 0xcf,
+	0x79, 0x14, 0x4f, 0xfb, 0xbf, 0x21, 0xb8, 0x33, 0x8a, 0xe2, 0xef, 0xbf, 0x0a, 0x2e, 0x2f, 0x09,
+	0xf7, 0x47, 0x43, 0x9f, 0xfc, 0xb8, 0x20, 0x8c, 0xe3, 0x27, 0xb0, 0x1f, 0x26, 0x51, 0xec, 0xa2,
+	0x1e, 0x1a, 0x74, 0x8e, 0xba, 0x87, 0xb9, 0xc9, 0xe1, 0xf0, 0xcb, 0x93, 0x67, 0xbe, 0x14, 0x62,
+	0x17, 0x9a, 0x9c, 0x30, 0x1e, 0x13, 0xee, 0xd6, 0x7a, 0x68, 0x60, 0xf9, 0x9a, 0xc4, 0x1e, 0x58,
+	0xb3, 0x84, 0xf1, 0x34, 0xa1, 0xdc, 0xad, 0xf7, 0xd0, 0xc0, 0xf6, 0x73, 0x5a, 0x58, 0xd1, 0x34,
+	0x5c, 0x30, 0x42, 0xdd, 0x86, 0x14, 0x69, 0x52, 0x49, 0xd2, 0x80, 0x31, 0xb7, 0x99, 0x4b, 0x04,
+	0xd9, 0x3f, 0x81, 0xbb, 0x25, 0x37, 0x59, 0x9a, 0xc4, 0x8c, 0x08, 0x13, 0x42, 0x69, 0x42, 0xe3,
+	0xc4, 0xed, 0xf4, 0xd0, 0xa0, 0xee, 0x6b, 0x12, 0xdf, 0x83, 0x06, 0xa1, 0x94, 0x71, 0xea, 0x76,
+	0xe5, 0x59, 0x8a, 0xea, 0xff, 0x8a, 0xe0, 0xd6, 0x33, 0x72, 0x75, 0x3c, 0x9d, 0x52, 0xc2, 0xd8,
+	0x8e, 0xc6, 0xfb, 0x1d, 0x60, 0xd3, 0xc7, 0x55, 0xb0, 0x41, 0xc6, 0x52, 0x7f, 0xa2, 0xc9, 0x17,
+	0x48, 0xc3, 0x73, 0x04, 0xdd, 0x93, 0x38, 0xe2, 0x51, 0xc0, 0xc9, 0x6e, 0x26, 0x01, 0x3f, 0x86,
+	0x56, 0x1a, 0x50, 0x3e, 0xd1, 0x31, 0x5b, 0x52, 0x7c, 0x20, 0x78, 0x2a, 0x33, 0x22, 0xba, 0x60,
+	0x9e, 0x2c, 0x62, 0xee, 0xda, 0x3d, 0x34, 0xd8, 0xf3, 0x15, 0xd5, 0xff, 0xb3, 0x06, 0xce, 0x2a,
+	0x3a, 0x95, 0xbe, 0x7b, 0xd0, 0x60, 0x24, 0xa4, 0x44, 0x7b, 0xa7, 0x28, 0xfc, 0x10, 0x20, 0xfb,
+	0x9a, 0x05, 0x6c, 0xa6, 0xdc, 0x33, 0x38, 0x22, 0xae, 0x30, 0x89, 0x39, 0x0d, 0x42, 0xae, 0x5c,
+	0xcc, 0x69, 0xfc, 0x04, 0xda, 0xfa, 0x7b, 0x92, 0x1e, 0xb1, 0x99, 0x72, 0xb2, 0xa5, 0x99, 0xa3,
+	0x23, 0x36, 0xc3, 0x8f, 0xe0, 0x20, 0x57, 0xe2, 0x4b, 0xe9, 0xaa, 0xed, 0x83, 0x66, 0x8d, 0x97,
+	0x78, 0x00, 0x8e, 0xa1, 0x30, 0x91, 0x7e, 0x80, 0xd4, 0xea, 0xac, 0xb4, 0xbe, 0x10, 0xbe, 0x38,
+	0xb0, 0x77, 0x41, 0x88, 0x7b, 0x20, 0xa3, 0x15, 0x9f, 0x22, 0x7f, 0x17, 0x84, 0xd0, 0x80, 0x13,
+	0xb7, 0xd5, 0x43, 0x83, 0x9a, 0xaf, 0xc9, 0x17, 0x28, 0x8a, 0x7f, 0x10, 0xe0, 0x51, 0x40, 0x79,
+	0x14, 0x46, 0xe9, 0xee, 0xd6, 0x45, 0x11, 0x2f, 0x6b, 0x0d, 0xaf, 0x72, 0xdd, 0xd8, 0xd7, 0xd5,
+	0x0d, 0x14, 0xea, 0xe6, 0x5f, 0x04, 0xb7, 0x0b, 0x09, 0x50, 0xa5, 0x63, 0x96, 0x40, 0x7d, 0x5b,
+	0x09, 0x34, 0xb6, 0x97, 0x40, 0xf3, 0x7f, 0x95, 0x80, 0x75, 0x5d, 0x09, 0xd8, 0x95, 0x25, 0x00,
+	0x2f, 0x5b, 0x02, 0x7f, 0x23, 0x68, 0xfb, 0x64, 0x4a, 0xc8, 0x7c, 0x47, 0xd1, 0x5f, 0x75, 0xb1,
+	0x55, 0xe8, 0x62, 0x13, 0x22, 0xbb, 0x04, 0x51, 0x29, 0xfb, 0x22, 0x49, 0xfb, 0x66, 0xf6, 0xfb,
+	0x7f, 0x20, 0xe8, 0xe8, 0xa8, 0x15, 0xe4, 0x0f, 0xc0, 0xa6, 0x92, 0x23, 0x2c, 0x94, 0xe3, 0x19,
+	0x63, 0xbc, 0xc4, 0xef, 0x40, 0x27, 0x17, 0x4e, 0x8c, 0xb1, 0xd1, 0xd2, 0x1a, 0x26, 0x52, 0xcd,
+	0x4a, 0xa4, 0xac, 0x97, 0x45, 0xea, 0xb9, 0x44, 0xea, 0x62, 0x11, 0x4f, 0x77, 0x14, 0x29, 0x13,
+	0x11, 0xeb, 0x7a, 0x44, 0xec, 0x0d, 0x88, 0x64, 0xd1, 0x99, 0x88, 0x08, 0x4e, 0x01, 0x11, 0xc1,
+	0xd0, 0x88, 0x28, 0x61, 0x09, 0x91, 0x4c, 0xe3, 0x35, 0x20, 0xf2, 0x3b, 0x82, 0xce, 0x68, 0x71,
+	0x7e, 0x19, 0xb1, 0xd9, 0x8e, 0x42, 0xd2, 0x81, 0x1a, 0x5f, 0x2a, 0x30, 0x6a, 0x7c, 0xd9, 0xff,
+	0x16, 0xba, 0xb9, 0xc3, 0x2a, 0xcb, 0xf7, 0xa1, 0xa9, 0x33, 0xa8, 0xd6, 0x24, 0xcf, 0x72, 0x77,
+	0xf3, 0x7c, 0xfc, 0x82, 0xe0, 0xce, 0xe7, 0x4b, 0x89, 0xe8, 0x99, 0x6c, 0xd2, 0x57, 0x94, 0x15,
+	0x31, 0x2b, 0xd3, 0x89, 0x68, 0xb5, 0x79, 0xca, 0xa3, 0x24, 0x5e, 0xd5, 0x43, 0x27, 0x4c, 0xfd,
+	0x9c, 0x3d, 0x5e, 0x6e, 0x5b, 0xed, 0xfd, 0x00, 0xee, 0x96, 0x1c, 0xdc, 0x72, 0x57, 0xb8, 0x79,
+	0x12, 0x7e, 0x42, 0xd0, 0x3a, 0x5e, 0x4c, 0x23, 0xfe, 0xea, 0x4a, 0x62, 0xe3, 0x2a, 0x2a, 0x75,
+	0x55, 0x63, 0xad, 0xab, 0xfe, 0xaa, 0x41, 0x5b, 0x39, 0xa3, 0x02, 0x7d, 0x0a, 0xdd, 0xdc, 0x44,
+	0xad, 0xc4, 0xba, 0xec, 0x8e, 0x7c, 0xed, 0x1c, 0x4b, 0x2e, 0x7e, 0xcf, 0x58, 0x50, 0x7a, 0xb3,
+	0x66, 0x09, 0xcd, 0x0f, 0xd0, 0xdb, 0xf5, 0x43, 0xb8, 0x9d, 0xab, 0x1a, 0xe9, 0xcf, 0x6a, 0x11,
+	0x6b, 0xd1, 0xd9, 0x6a, 0x63, 0x7f, 0x00, 0xb7, 0x28, 0x09, 0xa3, 0x34, 0x22, 0x71, 0xf9, 0xba,
+	0xe7, 0xe4, 0x02, 0x7d, 0xfa, 0xbb, 0x79, 0xa7, 0x17, 0x17, 0x7c, 0x3b, 0xe3, 0x6a, 0xb5, 0xa7,
+	0xd0, 0x55, 0x6a, 0x97, 0x49, 0xf8, 0x03, 0x8f, 0xe6, 0x44, 0xcd, 0x7d, 0x65, 0x7d, 0xaa, 0xb8,
+	0x37, 0x87, 0xf4, 0xfd, 0xc7, 0xb0, 0x2f, 0xa0, 0xc2, 0x4d, 0xd8, 0xfb, 0x6c, 0x3c, 0x74, 0xde,
+	0x10, 0x1f, 0xa7, 0xe3, 0xa1, 0x83, 0xc4, 0xc7, 0xd7, 0xdf, 0x0c, 0x9d, 0xda, 0xd1, 0xcf, 0x75,
+	0x68, 0x9e, 0x5d, 0x05, 0xe9, 0x69, 0x74, 0x8e, 0x7d, 0x68, 0x17, 0x1e, 0x2f, 0xf8, 0x91, 0x81,
+	0x79, 0xd5, 0xeb, 0xcb, 0xeb, 0x6d, 0x56, 0x50, 0xb0, 0x9d, 0x00, 0xac, 0x1e, 0x08, 0xf8, 0x2d,
+	0x43, 0x7f, 0xed, 0x6d, 0xe3, 0xbd, 0xbd, 0x41, 0xaa, 0x8e, 0x1a, 0x82, 0xa5, 0xaf, 0xca, 0xd8,
+	0x33, 0x54, 0x4b, 0xaf, 0x03, 0xef, 0x41, 0xa5, 0x4c, 0x1d, 0x72, 0x0a, 0x07, 0xc6, 0xbd, 0x09,
+	0x9b, 0x7f, 0xb9, 0x7e, 0xa1, 0xf4, 0x1e, 0x6e, 0x12, 0xab, 0xd3, 0x3e, 0x81, 0x46, 0xb6, 0x8d,
+	0xb1, 0x6b, 0x68, 0x16, 0xae, 0x25, 0xde, 0x9b, 0x15, 0x12, 0xd3, 0x5c, 0x60, 0x5c, 0x32, 0x37,
+	0x76, 0x65, 0xc9, 0xbc, 0xb0, 0x67, 0x3e, 0x85, 0xa6, 0x1a, 0x8a, 0xd8, 0xd4, 0x2a, 0x4e, 0x76,
+	0xcf, 0xab, 0x12, 0xa9, 0x13, 0x7c, 0x68, 0x17, 0xc6, 0x4a, 0x01, 0xf1, 0xaa, 0x89, 0x58, 0x40,
+	0xbc, 0x7a, 0x22, 0x7d, 0x0c, 0x75, 0xd9, 0xb9, 0xf8, 0xbe, 0xa1, 0x6a, 0x0e, 0x16, 0xcf, 0x5d,
+	0x17, 0x64, 0xb6, 0xe7, 0x0d, 0x29, 0xf8, 0xe8, 0xbf, 0x00, 0x00, 0x00, 0xff, 0xff, 0xca, 0xca,
+	0x4d, 0xe5, 0x0c, 0x10, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// SwapLibClient is the client API for SwapLib service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type SwapLibClient interface {
+	PingWalletRPC(ctx context.Context, in *PingWalletRPCRequest, opts ...grpc.CallOption) (*PingWalletRPCResponse, error)
+	NewAddress(ctx context.Context, in *NewAddressRequest, opts ...grpc.CallOption) (*NewAddressResponse, error)
+	Initiate(ctx context.Context, in *InitiateRequest, opts ...grpc.CallOption) (*InitiateResponse, error)
+	Participate(ctx context.Context, in *ParticipateRequest, opts ...grpc.CallOption) (*ParticipateResponse, error)
+	Redeem(ctx context.Context, in *RedeemRequest, opts ...grpc.CallOption) (*RedeemResponse, error)
+	Refund(ctx context.Context, in *RefundRequest, opts ...grpc.CallOption) (*RefundResponse, error)
+	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
+	ExtractSecret(ctx context.Context, in *ExtractSecretRequest, opts ...grpc.CallOption) (*ExtractSecretResponse, error)
+	Audit(ctx context.Context, in *AuditRequest, opts ...grpc.CallOption) (*AuditResponse, error)
+}
+
+type swapLibClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewSwapLibClient(cc *grpc.ClientConn) SwapLibClient {
+	return &swapLibClient{cc}
+}
+
+func (c *swapLibClient) PingWalletRPC(ctx context.Context, in *PingWalletRPCRequest, opts ...grpc.CallOption) (*PingWalletRPCResponse, error) {
+	out := new(PingWalletRPCResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/PingWalletRPC", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) NewAddress(ctx context.Context, in *NewAddressRequest, opts ...grpc.CallOption) (*NewAddressResponse, error) {
+	out := new(NewAddressResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/NewAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) Initiate(ctx context.Context, in *InitiateRequest, opts ...grpc.CallOption) (*InitiateResponse, error) {
+	out := new(InitiateResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/Initiate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) Participate(ctx context.Context, in *ParticipateRequest, opts ...grpc.CallOption) (*ParticipateResponse, error) {
+	out := new(ParticipateResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/Participate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) Redeem(ctx context.Context, in *RedeemRequest, opts ...grpc.CallOption) (*RedeemResponse, error) {
+	out := new(RedeemResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/Redeem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) Refund(ctx context.Context, in *RefundRequest, opts ...grpc.CallOption) (*RefundResponse, error) {
+	out := new(RefundResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/Refund", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error) {
+	out := new(PublishResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/Publish", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) ExtractSecret(ctx context.Context, in *ExtractSecretRequest, opts ...grpc.CallOption) (*ExtractSecretResponse, error) {
+	out := new(ExtractSecretResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/ExtractSecret", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *swapLibClient) Audit(ctx context.Context, in *AuditRequest, opts ...grpc.CallOption) (*AuditResponse, error) {
+	out := new(AuditResponse)
+	err := c.cc.Invoke(ctx, "/protobind.SwapLib/Audit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SwapLibServer is the server API for SwapLib service.
+type SwapLibServer interface {
+	PingWalletRPC(context.Context, *PingWalletRPCRequest) (*PingWalletRPCResponse, error)
+	NewAddress(context.Context, *NewAddressRequest) (*NewAddressResponse, error)
+	Initiate(context.Context, *InitiateRequest) (*InitiateResponse, error)
+	Participate(context.Context, *ParticipateRequest) (*ParticipateResponse, error)
+	Redeem(context.Context, *RedeemRequest) (*RedeemResponse, error)
+	Refund(context.Context, *RefundRequest) (*RefundResponse, error)
+	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
+	ExtractSecret(context.Context, *ExtractSecretRequest) (*ExtractSecretResponse, error)
+	Audit(context.Context, *AuditRequest) (*AuditResponse, error)
+}
+
+func RegisterSwapLibServer(s *grpc.Server, srv SwapLibServer) {
+	s.RegisterService(&_SwapLib_serviceDesc, srv)
+}
+
+func _SwapLib_PingWalletRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingWalletRPCRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).PingWalletRPC(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/PingWalletRPC",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).PingWalletRPC(ctx, req.(*PingWalletRPCRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_NewAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).NewAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/NewAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).NewAddress(ctx, req.(*NewAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_Initiate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitiateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).Initiate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/Initiate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).Initiate(ctx, req.(*InitiateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_Participate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ParticipateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).Participate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/Participate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).Participate(ctx, req.(*ParticipateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_Redeem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RedeemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).Redeem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/Redeem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).Redeem(ctx, req.(*RedeemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_Refund_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefundRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).Refund(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/Refund",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).Refund(ctx, req.(*RefundRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).Publish(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/Publish",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).Publish(ctx, req.(*PublishRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_ExtractSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExtractSecretRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).ExtractSecret(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/ExtractSecret",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).ExtractSecret(ctx, req.(*ExtractSecretRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SwapLib_Audit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuditRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SwapLibServer).Audit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protobind.SwapLib/Audit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SwapLibServer).Audit(ctx, req.(*AuditRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _SwapLib_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "protobind.SwapLib",
+	HandlerType: (*SwapLibServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "PingWalletRPC",
+			Handler:    _SwapLib_PingWalletRPC_Handler,
+		},
+		{
+			MethodName: "NewAddress",
+			Handler:    _SwapLib_NewAddress_Handler,
+		},
+		{
+			MethodName: "Initiate",
+			Handler:    _SwapLib_Initiate_Handler,
+		},
+		{
+			MethodName: "Participate",
+			Handler:    _SwapLib_Participate_Handler,
+		},
+		{
+			MethodName: "Redeem",
+			Handler:    _SwapLib_Redeem_Handler,
+		},
+		{
+			MethodName: "Refund",
+			Handler:    _SwapLib_Refund_Handler,
+		},
+		{
+			MethodName: "Publish",
+			Handler:    _SwapLib_Publish_Handler,
+		},
+		{
+			MethodName: "ExtractSecret",
+			Handler:    _SwapLib_ExtractSecret_Handler,
+		},
+		{
+			MethodName: "Audit",
+			Handler:    _SwapLib_Audit_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "atomicswap.proto",
 }

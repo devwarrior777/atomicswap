@@ -9,10 +9,10 @@ The gen tool generates golang<->golang protobuf code so useful only for
 the grpc server side.
 
 Above this directory is one for each supported coin with all the code to
-make atomicswap transactions by connecting to a coin-specific full-node(s)
-containing the desired wallet(s)
+make atomicswap transactions by connecting to coin-specific full-nodes
+containing the desired wallets
 
-This is adapted from decred/atomicswap and heavily refactred and modified 
+This is adapted from decred/atomicswap and heavily refactored and modified 
 
 At the moment paths are hard coded but later I will make everything dependent
 on configuration files

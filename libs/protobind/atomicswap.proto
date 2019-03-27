@@ -6,8 +6,18 @@
 syntax = "proto3";
 package protobind;
 
-message PingWalletRpcRequest {
-	string coin = 1;
+//
+// Shared with dragon - keep coins in sync
+//
+enum COIN {
+	BTC = 0;
+	LTC = 1;
+	XZC = 2;
+	//...
+}
+
+message PingWalletRPCRequest {
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string hostport = 5;	// default localhost
@@ -15,13 +25,13 @@ message PingWalletRpcRequest {
 	string rpcpass = 7;
 }
 
-message PingWalletRpcResponse {
+message PingWalletRPCResponse {
 	int32 errorno = 14;
 	string errstr = 15;
 }
 
 message NewAddressRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string hostport = 5;	// default localhost
@@ -36,7 +46,7 @@ message NewAddressResponse {
 }
 
 message InitiateRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string hostport = 5;
@@ -54,7 +64,7 @@ message InitiateResponse {
 	string contract_p2sh = 8;
 	string contract_tx = 9;
 	string contract_tx_hash = 10;
-	int64 fee = 11;
+	int64 fee = 11;			// "satoshis"
 	float feerate = 12;
 
 	int32 errorno = 14;
@@ -62,7 +72,7 @@ message InitiateResponse {
 }
 
 message ParticipateRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string hostport = 5;
@@ -79,7 +89,7 @@ message ParticipateResponse {
 	string contract_p2sh = 6;
 	string contract_tx = 7;
 	string contract_tx_hash = 8;
-	int64 fee = 9;
+	int64 fee = 9;			// "satoshis"
 	float feerate = 10;
 
 	int32 errorno = 14;
@@ -87,7 +97,7 @@ message ParticipateResponse {
 }
 
 message RedeemRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string hostport = 5;
@@ -102,7 +112,7 @@ message RedeemRequest {
 message RedeemResponse {
 	string redeem_tx = 5;
 	string redeem_tx_hash = 6;
-	int64 fee = 7;
+	int64 fee = 7;			// "satoshis"
 	float feerate = 8;
 
 	int32 errorno = 14;
@@ -110,7 +120,7 @@ message RedeemResponse {
 }
 
 message RefundRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string hostport = 5;
@@ -124,7 +134,7 @@ message RefundRequest {
 message RefundResponse {
 	string refund_tx = 5;
 	string refund_tx_hash = 6;
-	int64 fee = 7;
+	int64 fee = 7;			// "satoshis"
 	float feerate = 8;
 
 	int32 errorno = 14;
@@ -132,7 +142,7 @@ message RefundResponse {
 }
 
 message PublishRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string hostport = 5;
@@ -150,7 +160,7 @@ message PublishResponse {
 }
 
 message ExtractSecretRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string cp_redemption_tx = 5;
@@ -165,7 +175,7 @@ message ExtractSecretResponse {
 }
 
 message AuditRequest {
-	string coin = 1;
+	COIN coin = 1;
 	bool testnet = 2;
 
 	string contract = 5;
@@ -184,5 +194,17 @@ message AuditResponse {
 	string errstr = 15;
 }
 
-//TODO: Define service and implement golang side server so other bindings can access as client
 
+//TODO: Implement golang side server so other language bindings can access as client
+service SwapLib {
+	rpc PingWalletRPC(PingWalletRPCRequest) returns(PingWalletRPCResponse);
+	rpc NewAddress(NewAddressRequest) returns(NewAddressResponse);
+	rpc Initiate(InitiateRequest) returns (InitiateResponse);
+	rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+	rpc Redeem(RedeemRequest) returns(RedeemResponse);
+	rpc Refund(RefundRequest) returns(RefundResponse);
+	rpc Publish(PublishRequest) returns(PublishResponse);
+	rpc ExtractSecret(ExtractSecretRequest) returns(ExtractSecretResponse);
+	rpc Audit(AuditRequest) returns(AuditResponse);
+	//...
+}
