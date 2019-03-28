@@ -1,106 +1,74 @@
 package libs
 
 //
-// for Golang client - import this libs pkg directly
+// For Golang client - ignore this file as we do not need a server.
+// import the libs/<COIN> pkg directly
+//
+// For node, python, etc. make client bindings for your language
+// using the atomicswap.proto as the definitions
 //
 
 import (
 	"fmt"
 
 	"github.com/devwarrior777/atomicswap/libs/ltc"
-	pb "github.com/devwarrior777/atomicswap/libs/protobind"
+	bnd "github.com/devwarrior777/atomicswap/libs/protobind"
 	"github.com/devwarrior777/atomicswap/libs/xzc"
 )
 
 // PingWalletRPC checks if the wallet node is available for the coin and network
-func PingWalletRPC(coin pb.COIN, testnet bool, hostport string, rpcuser string, rpcpass string) error {
-	switch coin {
+// The server wants an error returned but we embed our errors in the binding. If
+// the response gets to the client with an error it means there was a transport error
+func PingWalletRPC(request *bnd.PingWalletRPCRequest) (*bnd.PingWalletRPCResponse, error) {
+	switch request.Coin {
 	//case pb.COIN_BTC:
 	//	return newAddressBtc(testnet, hostport, rpcuser, rpcpass)
-	case pb.COIN_LTC:
-		return pingWalletRPCLtc(testnet, hostport, rpcuser, rpcpass)
-	case pb.COIN_XZC:
-		return pingWalletRPCXzc(testnet, hostport, rpcuser, rpcpass)
+	case bnd.COIN_LTC:
+		return pingWalletRPCLtc(request), nil
+	case bnd.COIN_XZC:
+		return pingWalletRPCXzc(request), nil
+		//
+		//...more coins
 	}
-	return fmt.Errorf("unsupported coin: %s", coin)
+	response := &bnd.PingWalletRPCResponse{Errorno: bnd.ERRNO_UNSUPPORTED}
+	response.Errstr = fmt.Sprintf("unsupported coin: %v", request.Coin)
+	return response, nil
 }
 
-func pingWalletRPCLtc(testnet bool, hostport string, rpcuser string, rpcpass string) error {
+func pingWalletRPCLtc(request *bnd.PingWalletRPCRequest) *bnd.PingWalletRPCResponse {
+	response := &bnd.PingWalletRPCResponse{}
 	rpcinfo := ltc.RPCInfo{
-		HostPort: hostport,
-		User:     rpcuser,
-		Pass:     rpcpass,
+		HostPort: request.Hostport,
+		User:     request.Rpcuser,
+		Pass:     request.Rpcpass,
 	}
-	err := ltc.PingRPC(testnet, rpcinfo)
+	err := ltc.PingRPC(request.Testnet, rpcinfo)
 	if err != nil {
-		return err
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response
 	}
-	return nil
+
+	response.Errorno = bnd.ERRNO_OK
+	return response
 }
 
-func pingWalletRPCXzc(testnet bool, hostport string, rpcuser string, rpcpass string) error {
+func pingWalletRPCXzc(request *bnd.PingWalletRPCRequest) *bnd.PingWalletRPCResponse {
+	response := &bnd.PingWalletRPCResponse{}
 	rpcinfo := xzc.RPCInfo{
-		HostPort: hostport,
-		User:     rpcuser,
-		Pass:     rpcpass,
+		HostPort: request.Hostport,
+		User:     request.Rpcuser,
+		Pass:     request.Rpcpass,
 	}
-	err := xzc.PingRPC(testnet, rpcinfo)
+	err := xzc.PingRPC(request.Testnet, rpcinfo)
 	if err != nil {
-		return err
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response
 	}
-	return nil
-}
 
-// NewAddress gets a new wallet address for the coin and network
-func NewAddress(coin pb.COIN, testnet bool, hostport string, rpcuser string, rpcpass string) (string, error) {
-	switch coin {
-	//case pb.COIN_BTC:
-	//	return newAddressBtc(testnet, hostport, rpcuser, rpcpass)
-	case pb.COIN_LTC:
-		return newAddressLtc(testnet, hostport, rpcuser, rpcpass)
-	case pb.COIN_XZC:
-		return newAddressXzc(testnet, hostport, rpcuser, rpcpass)
-	}
-	return "", fmt.Errorf("unsupported coin: %s", coin)
+	response.Errorno = bnd.ERRNO_OK
+	return response
 }
-
-func newAddressLtc(testnet bool, hostport string, rpcuser string, rpcpass string) (string, error) {
-	rpcinfo := ltc.RPCInfo{
-		HostPort: hostport,
-		User:     rpcuser,
-		Pass:     rpcpass,
-	}
-	newAddr, err := ltc.GetNewAddress(testnet, rpcinfo)
-	if err != nil {
-		return "", err
-	}
-	return newAddr.String(), nil
-}
-
-func newAddressXzc(testnet bool, hostport string, rpcuser string, rpcpass string) (string, error) {
-	rpcinfo := xzc.RPCInfo{
-		HostPort: hostport,
-		User:     rpcuser,
-		Pass:     rpcpass,
-	}
-	newAddr, err := xzc.GetNewAddress(testnet, rpcinfo)
-	if err != nil {
-		return "", err
-	}
-	return newAddr.String(), nil
-}
-
-// // Initiate creates a contract to be redeemed by the participant
-// func Initiate(coin pb.COIN, testnet bool, hostport string, rpcuser string, rpcpass string, partAddress string, amount int64) (InitiateResult, error) {
-// 	switch coin {
-// 	//case pb.COIN_BTC:
-// 	//	return newAddressBtc(testnet, hostport, rpcuser, rpcpass)
-// 	case pb.COIN_LTC:
-// 		return newAddressLtc(testnet, hostport, rpcuser, rpcpass, partAddress, amount)
-// 	case pb.COIN_XZC:
-// 		return newAddressXzc(testnet, hostport, rpcuser, rpcpass)
-// 	}
-// 	return InitiateResult{}, fmt.Errorf("unsupported coin: %s", coin)
-// }
 
 //...

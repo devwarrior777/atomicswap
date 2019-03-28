@@ -16,6 +16,12 @@ enum COIN {
 	//...
 }
 
+enum ERRNO {
+	OK = 0;
+	LIBS = 1;
+	UNSUPPORTED = 2;
+}
+
 message PingWalletRPCRequest {
 	COIN coin = 1;
 	bool testnet = 2;
@@ -26,7 +32,7 @@ message PingWalletRPCRequest {
 }
 
 message PingWalletRPCResponse {
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -41,7 +47,7 @@ message NewAddressRequest {
 
 message NewAddressResponse {
 	string address = 5;
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -67,7 +73,7 @@ message InitiateResponse {
 	int64 fee = 11;			// "satoshis"
 	float feerate = 12;
 
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -92,7 +98,7 @@ message ParticipateResponse {
 	int64 fee = 9;			// "satoshis"
 	float feerate = 10;
 
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -115,7 +121,7 @@ message RedeemResponse {
 	int64 fee = 7;			// "satoshis"
 	float feerate = 8;
 
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -137,7 +143,7 @@ message RefundResponse {
 	int64 fee = 7;			// "satoshis"
 	float feerate = 8;
 
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -155,7 +161,7 @@ message PublishRequest {
 message PublishResponse {
 	string tx_hash = 5;
 
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -170,7 +176,7 @@ message ExtractSecretRequest {
 message ExtractSecretResponse {
 	string secret = 5;
 
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
@@ -190,7 +196,7 @@ message AuditResponse {
 	string refund_address = 9;
 	uint64 refund_locktime = 10;
 
-	int32 errorno = 14;
+	ERRNO errorno = 14;
 	string errstr = 15;
 }
 
