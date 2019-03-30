@@ -1,20 +1,22 @@
+gRPC support
+============
+
 The functionality here can be used directly by golang clients just by
-importing it.
+importing it:
 
-When a server is set up this code will be on the server side of grpc.
+import (
+    "github.com/devwarrior777/atomicswap/libs/ltc"
+	"github.com/devwarrior777/atomicswap/libs/xzc"
+	//...
+)
 
-Client side you can generate into any language supported by grpc.
+Other languages
+---------------
+
+When the gRPC SwapServer is running this code will be on the server side of grpc.
+
+Client side you can generate into any language supported by grpc such as python,
+nodejs, etc.
 
 The gen tool generates golang<->golang protobuf code so useful only for
-the grpc server side.
-
-Above this directory is one for each supported coin with all the code to
-make atomicswap transactions by connecting to coin-specific full-nodes
-containing the desired wallets
-
-This is adapted from decred/atomicswap and heavily refactored and modified 
-
-At the moment paths are hard coded but later I will make everything dependent
-on configuration files
-
-All is currently using go12.1
+the golang gRPC server side.

@@ -10,6 +10,7 @@ vendor/
 .vscode/
 
 # Development binaries
+libs/protobind/server/server
 cmd/bchatomicswap/bchatomicswap
 cmd/btcatomicswap/btcatomicswap
 cmd/dcratomicswap/dcratomicswap
