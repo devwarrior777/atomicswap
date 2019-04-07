@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
 	rpc "github.com/zcoinofficial/xzcd/rpcclient"
 	"github.com/zcoinofficial/xzcd/txscript"
@@ -21,7 +22,7 @@ import (
 
 // startRPC - starts a new RPC client for the network and address specified
 //            along with rpc user & rpc password, in RPCInfo
-func startRPC(testnet bool, rpcinfo RPCInfo) (*rpc.Client, error) {
+func startRPC(testnet bool, rpcinfo libs.RPCInfo) (*rpc.Client, error) {
 	hostport, err := getNormalizedAddress(testnet, rpcinfo.HostPort)
 	if err != nil {
 		return nil, fmt.Errorf("wallet server address: %v", err)

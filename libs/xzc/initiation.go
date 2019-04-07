@@ -12,14 +12,16 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/devwarrior777/atomicswap/libs"
+
 	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
 	"github.com/zcoinofficial/xzcutil"
 )
 
 // initiate creates a new secret then builds a contract & a contract transaction depending
 // upon that secret
-func initiate(testnet bool, rpcinfo RPCInfo, params InitiateParams) (InitiateResult, error) {
-	var result = InitiateResult{}
+func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (libs.InitiateResult, error) {
+	var result = libs.InitiateResult{}
 
 	chainParams := getChainParams(testnet)
 

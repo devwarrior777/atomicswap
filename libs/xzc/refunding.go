@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
 	rpc "github.com/zcoinofficial/xzcd/rpcclient"
 	"github.com/zcoinofficial/xzcd/txscript"
@@ -19,8 +20,8 @@ import (
 )
 
 // Build a transaction that can refund the coins back to the contract creator
-func refund(testnet bool, rpcinfo RPCInfo, params RefundParams) (RefundResult, error) {
-	var result = RefundResult{}
+func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.RefundResult, error) {
+	var result = libs.RefundResult{}
 
 	chainParams := getChainParams(testnet)
 

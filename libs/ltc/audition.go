@@ -10,14 +10,15 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/ltcsuite/ltcd/txscript"
 	"github.com/ltcsuite/ltcd/wire"
 	"github.com/ltcsuite/ltcutil"
 )
 
 // auditContract pulls out information from the counterparty's contract
-func auditContract(testnet bool, params AuditParams) (AuditResult, error) {
-	result := AuditResult{}
+func auditContract(testnet bool, params libs.AuditParams) (libs.AuditResult, error) {
+	result := libs.AuditResult{}
 
 	chainParams := getChainParams(testnet)
 

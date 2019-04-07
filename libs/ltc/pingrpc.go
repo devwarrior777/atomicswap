@@ -4,8 +4,12 @@
 
 package ltc
 
+import (
+	"github.com/devwarrior777/atomicswap/libs"
+)
+
 // pingrpc tests if wallet node RPC is available
-func pingrpc(testnet bool, rpcinfo RPCInfo) error {
+func pingrpc(testnet bool, rpcinfo libs.RPCInfo) error {
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
 		return err

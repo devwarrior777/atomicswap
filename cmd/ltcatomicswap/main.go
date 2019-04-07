@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/devwarrior777/atomicswap/libs/ltc" // Use new libs/ltc pkg
 	"github.com/ltcsuite/ltcd/txscript"
 )
@@ -158,7 +159,7 @@ func initiate(args []string) error {
 		return err
 	}
 
-	var rpcinfo ltc.RPCInfo
+	var rpcinfo libs.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
@@ -168,21 +169,21 @@ func initiate(args []string) error {
 		return fmt.Errorf("Ping RPC: error: %v", err)
 	}
 
-	var params ltc.InitiateParams
+	var params libs.InitiateParams
 	params.CP2Addr = args[1]
 	params.CP2Amount = int64(amount)
 
-	var result ltc.InitiateResult
+	var result libs.InitiateResult
 	result, err = ltc.Initiate(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	var refundParams ltc.RefundParams
+	var refundParams libs.RefundParams
 	refundParams.Contract = result.Contract
 	refundParams.ContractTx = result.ContractTx
 
-	var refundResult ltc.RefundResult
+	var refundResult libs.RefundResult
 	refundResult, err = ltc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
 		return fmt.Errorf("Initiate: %v", err)
@@ -225,7 +226,7 @@ func participate(args []string) error {
 		return err
 	}
 
-	var rpcinfo ltc.RPCInfo
+	var rpcinfo libs.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
@@ -235,22 +236,22 @@ func participate(args []string) error {
 		return fmt.Errorf("Ping RPC: error: %v", err)
 	}
 
-	var params ltc.ParticipateParams
+	var params libs.ParticipateParams
 	params.SecretHash = args[3]
 	params.CP1Addr = args[1]
 	params.CP1Amount = int64(amount)
 
-	var result ltc.ParticipateResult
+	var result libs.ParticipateResult
 	result, err = ltc.Participate(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Participate: %v", err)
 	}
 
-	var refundParams ltc.RefundParams
+	var refundParams libs.RefundParams
 	refundParams.Contract = result.Contract
 	refundParams.ContractTx = result.ContractTx
 
-	var refundResult ltc.RefundResult
+	var refundResult libs.RefundResult
 	refundResult, err = ltc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
 		return fmt.Errorf("Initiate: %v", err)
@@ -282,7 +283,7 @@ func participate(args []string) error {
 }
 
 func redeem(args []string) error {
-	var rpcinfo ltc.RPCInfo
+	var rpcinfo libs.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
@@ -292,12 +293,12 @@ func redeem(args []string) error {
 		return fmt.Errorf("Ping RPC: error: %v", err)
 	}
 
-	var params ltc.RedeemParams
+	var params libs.RedeemParams
 	params.Contract = args[1]
 	params.ContractTx = args[2]
 	params.Secret = args[3]
 
-	var result ltc.RedeemResult
+	var result libs.RedeemResult
 	result, err = ltc.Redeem(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Redeem: %v", err)
@@ -323,7 +324,7 @@ func redeem(args []string) error {
 }
 
 func refund(args []string) error {
-	var rpcinfo ltc.RPCInfo
+	var rpcinfo libs.RPCInfo
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
@@ -333,11 +334,11 @@ func refund(args []string) error {
 		return fmt.Errorf("Ping RPC: error: %v", err)
 	}
 
-	var params ltc.RefundParams
+	var params libs.RefundParams
 	params.Contract = args[1]
 	params.ContractTx = args[2]
 
-	var result ltc.RefundResult
+	var result libs.RefundResult
 	result, err = ltc.Refund(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Refund: %v", err)
@@ -374,11 +375,11 @@ func extractSecret(args []string) error {
 }
 
 func auditContract(args []string) error {
-	var params ltc.AuditParams
+	var params libs.AuditParams
 	params.Contract = args[1]
 	params.ContractTx = args[2]
 
-	var result ltc.AuditResult
+	var result libs.AuditResult
 	result, err := ltc.AuditContract(*testnetFlag, params)
 	if err != nil {
 		return err

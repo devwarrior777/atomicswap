@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/ltcsuite/ltcd/chaincfg/chainhash"
 	"github.com/ltcsuite/ltcutil"
 )
@@ -19,8 +20,8 @@ import (
 // participate builds a contract & a contract transaction depending upon the hash of the
 // (shared) secret. The participant will know the secret only when initiator redeems the
 // contract made here
-func participate(testnet bool, rpcinfo RPCInfo, params ParticipateParams) (ParticipateResult, error) {
-	var result = ParticipateResult{}
+func participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (libs.ParticipateResult, error) {
+	var result = libs.ParticipateResult{}
 
 	chainParams := getChainParams(testnet)
 

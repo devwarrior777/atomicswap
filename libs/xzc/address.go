@@ -5,14 +5,14 @@
 package xzc
 
 import (
-	"github.com/zcoinofficial/xzcutil"
+	"github.com/devwarrior777/atomicswap/libs"
 )
 
 // newaddress gets a new wallet address from the controlled wallet
-func newaddress(testnet bool, rpcinfo RPCInfo) (xzcutil.Address, error) {
+func newaddress(testnet bool, rpcinfo libs.RPCInfo) (string, error) {
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer func() {
 		rpcclient.Shutdown()
@@ -21,8 +21,8 @@ func newaddress(testnet bool, rpcinfo RPCInfo) (xzcutil.Address, error) {
 
 	addr, err := getNewAddress(testnet, rpcclient)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return addr, nil
+	return addr.String(), nil
 }

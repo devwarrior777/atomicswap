@@ -29,6 +29,7 @@ message PingWalletRPCRequest {
 	string hostport = 5;	// default localhost
 	string rpcuser = 6;
 	string rpcpass = 7;
+	string certs = 8;
 }
 
 message PingWalletRPCResponse {
@@ -43,6 +44,7 @@ message NewAddressRequest {
 	string hostport = 5;	// default localhost
 	string rpcuser = 6;
 	string rpcpass = 7;
+	string certs = 8;
 }
 
 message NewAddressResponse {
@@ -58,9 +60,10 @@ message InitiateRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
+	string certs = 8;
 
-	string part_address = 8;
-	int64 amount = 9;		// "satoshis"
+	string part_address = 9;
+	int64 amount = 10;		// "satoshis"
 }
 
 message InitiateResponse {
@@ -84,10 +87,11 @@ message ParticipateRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
+	string certs = 8; // currently only needed for DCR
 
-	string secrethash = 8;
-	string part_address = 9;
-	int64 amount = 10;		// "satoshis"
+	string secrethash = 9;
+	string part_address = 10;
+	int64 amount = 11;		// "satoshis"
 }
 
 message ParticipateResponse {
@@ -109,10 +113,11 @@ message RedeemRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
+	string certs = 8;
 
-	string secret = 8;	
-	string contract = 9;
-	uint64 contract_tx = 10;
+	string secret = 9;	
+	string contract = 10;
+	uint64 contract_tx = 11;
 }
 
 message RedeemResponse {
@@ -132,9 +137,10 @@ message RefundRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
+	string certs = 8;
 
-	string contract = 8;
-	uint64 contract_tx = 9;
+	string contract = 9;
+	uint64 contract_tx = 10;
 }
 
 message RefundResponse {
@@ -154,8 +160,9 @@ message PublishRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
+	string certs = 8;
 
-	string tx = 8;
+	string tx = 9;
 }
 
 message PublishResponse {

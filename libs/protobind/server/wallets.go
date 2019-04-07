@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	bnd "github.com/devwarrior777/atomicswap/libs/protobind"
 
 	"github.com/devwarrior777/atomicswap/libs/ltc"
@@ -39,7 +40,7 @@ func pingWalletRPC(request *bnd.PingWalletRPCRequest) *bnd.PingWalletRPCResponse
 
 func pingWalletRPCLtc(request *bnd.PingWalletRPCRequest) *bnd.PingWalletRPCResponse {
 	response := &bnd.PingWalletRPCResponse{}
-	rpcinfo := ltc.RPCInfo{
+	rpcinfo := libs.RPCInfo{
 		HostPort: request.Hostport,
 		User:     request.Rpcuser,
 		Pass:     request.Rpcpass,
@@ -57,7 +58,7 @@ func pingWalletRPCLtc(request *bnd.PingWalletRPCRequest) *bnd.PingWalletRPCRespo
 
 func pingWalletRPCXzc(request *bnd.PingWalletRPCRequest) *bnd.PingWalletRPCResponse {
 	response := &bnd.PingWalletRPCResponse{}
-	rpcinfo := xzc.RPCInfo{
+	rpcinfo := libs.RPCInfo{
 		HostPort: request.Hostport,
 		User:     request.Rpcuser,
 		Pass:     request.Rpcpass,

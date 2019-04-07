@@ -10,17 +10,19 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/devwarrior777/atomicswap/libs"
+
 	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
 	"github.com/zcoinofficial/xzcd/txscript"
 	"github.com/zcoinofficial/xzcd/wire"
-	xzcutil "github.com/zcoinofficial/xzcutil"
+	"github.com/zcoinofficial/xzcutil"
 	"github.com/zcoinofficial/xzcwallet/wallet/txrules"
 )
 
 // Build a transaction that can redeem the coins in the passed in contract using
 // the (shared) secret
-func redeem(testnet bool, rpcinfo RPCInfo, params RedeemParams) (RedeemResult, error) {
-	var result = RedeemResult{}
+func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.RedeemResult, error) {
+	var result = libs.RedeemResult{}
 
 	chainParams := getChainParams(testnet)
 

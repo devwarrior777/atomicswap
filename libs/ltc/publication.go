@@ -9,11 +9,12 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/ltcsuite/ltcd/wire"
 )
 
 // Publish (broadcast) transaction to the network.
-func publish(testnet bool, rpcinfo RPCInfo, tx string) (string, error) {
+func publish(testnet bool, rpcinfo libs.RPCInfo, tx string) (string, error) {
 	txBytes, err := hex.DecodeString(tx)
 	if err != nil {
 		return "", fmt.Errorf("failed to decode broadcast transaction bytes: %v", err)
