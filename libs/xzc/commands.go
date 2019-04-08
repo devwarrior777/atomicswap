@@ -69,4 +69,9 @@ func ExtractSecret(redemptionTx string, secretHash string) (string, error) {
 	return extractSecret(redemptionTx, secretHash)
 }
 
+// GetTx gets info on a broadcasted transaction
+func GetTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (*libs.GetTxResult, error) {
+	return getTx(testnet, rpcinfo, txid)
+}
+
 //...

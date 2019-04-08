@@ -64,15 +64,57 @@ func getBlockCount(testnet bool, rpcclient *rpc.Client) (int, error) {
 	return blockCount, nil
 }
 
+func getTransaction(testnet bool, rpcclient *rpc.Client, txid string) (*libs.GetTxResult, error) {
+	txidBytes, err := json.Marshal(txid)
+	if err != nil {
+		return nil, err
+	}
+	param := []json.RawMessage{txidBytes}
+	rawResp, err := rpcclient.RawRequest("gettransaction", param)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Confirmations uint64 `json:"confirmations"`
+		Blockhash     string `json:"blockhash"`
+		Blockindex    int    `json:"blockindex"`
+		Blocktime     uint64 `json:"blocktime"`
+		Time          uint64 `json:"time"`
+		TimeReceived  uint64 `json:"timereceived"`
+		Hex           string `json:"hex"`
+	}
+
+	err = json.Unmarshal(rawResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	var result libs.GetTxResult
+	result.Confirmations = resp.Confirmations
+	result.Blockhash = resp.Blockhash
+	result.Blockindex = resp.Blockindex
+	result.Blocktime = resp.Blocktime
+	result.Time = resp.Time
+	result.TimeReceived = resp.TimeReceived
+	result.Hex = resp.Hex
+	return &result, nil
+}
+
 // getNewAddress calls the getnewaddress JSON-RPC method.  It is
 // implemented manually as the rpcclient implementation always passes the
 // account parameter which was removed in Bitcoin Core 0.15.
 func getNewAddress(testnet bool, rpcclient *rpc.Client) (ltcutil.Address, error) {
 	chainParams := getChainParams(testnet)
-
-	param0 := []json.RawMessage{[]byte(`""`)} // Deprecated but necessary in this position
-	param1 := []json.RawMessage{[]byte(`"legacy"`)}
-	params := append(param0, param1...)
+	account, err := json.Marshal("") // Deprecated but necessary in this position
+	if err != nil {
+		return nil, err
+	}
+	legacy, err := json.Marshal("legacy") // We use legacy adddresses
+	if err != nil {
+		return nil, err
+	}
+	params := []json.RawMessage{account, legacy}
 	rawResp, err := rpcclient.RawRequest("getnewaddress", params)
 	if err != nil {
 		return nil, err

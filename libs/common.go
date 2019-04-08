@@ -91,3 +91,14 @@ type AuditResult struct {
 	ContractRefundAddress    string
 	ContractRefundLocktime   int64
 }
+
+// GetTxResult is returned from GetTx command
+type GetTxResult struct {
+	Confirmations uint64
+	Blockhash     string
+	Blockindex    int
+	Blocktime     uint64
+	Time          uint64
+	TimeReceived  uint64
+	Hex           string
+}
