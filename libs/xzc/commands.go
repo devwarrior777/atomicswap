@@ -31,27 +31,27 @@ func GetNewAddress(testnet bool, rpcinfo libs.RPCInfo) (string, error) {
 }
 
 // Initiate command builds a P2SH contract and a transaction to fund it
-func Initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (libs.InitiateResult, error) {
+func Initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*libs.InitiateResult, error) {
 	return initiate(testnet, rpcinfo, params)
 }
 
 // Participate command builds a P2SH contract and a transaction to fund it
-func Participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (libs.ParticipateResult, error) {
+func Participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (*libs.ParticipateResult, error) {
 	return participate(testnet, rpcinfo, params)
 }
 
 // Redeem command builds a transaction to redeem a contract
-func Redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.RedeemResult, error) {
+func Redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs.RedeemResult, error) {
 	return redeem(testnet, rpcinfo, params)
 }
 
 // Refund command builds a refund transaction for an unredeemed contract
-func Refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.RefundResult, error) {
+func Refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (*libs.RefundResult, error) {
 	return refund(testnet, rpcinfo, params)
 }
 
 // AuditContract command
-func AuditContract(testnet bool, params libs.AuditParams) (libs.AuditResult, error) {
+func AuditContract(testnet bool, params libs.AuditParams) (*libs.AuditResult, error) {
 	return auditContract(testnet, params)
 }
 

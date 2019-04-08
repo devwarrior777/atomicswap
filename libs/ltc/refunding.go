@@ -20,37 +20,35 @@ import (
 )
 
 // Build a transaction that can refund the coins back to the contract creator
-func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.RefundResult, error) {
-	var result = libs.RefundResult{}
-
+func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (*libs.RefundResult, error) {
 	chainParams := getChainParams(testnet)
 
 	contract, err := hex.DecodeString(params.Contract)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract: %v", err)
+		return nil, fmt.Errorf("failed to decode contract: %v", err)
 	}
 
 	contractTxBytes, err := hex.DecodeString(params.ContractTx)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return nil, fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
 	var contractTx wire.MsgTx
 	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return nil, fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
 
 	pushes, err := txscript.ExtractAtomicSwapDataPushes(0, contract)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	if pushes == nil {
-		return result, errors.New("contract is not an atomic swap script recognized by this tool")
+		return nil, errors.New("contract is not an atomic swap script recognized by this tool")
 	}
 
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	defer func() {
 		rpcclient.Shutdown()
@@ -59,16 +57,16 @@ func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.
 
 	feePerKb, minFeePerKb, err := getFeePerKb(rpcclient)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	contractP2SH, err := ltcutil.NewAddressScriptHash(contract, chainParams)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	contractP2SHPkScript, err := txscript.PayToAddrScript(contractP2SH)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	contractTxHash := contractTx.TxHash()
@@ -80,21 +78,21 @@ func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.
 		}
 	}
 	if contractOutPoint.Index == ^uint32(0) {
-		return result, errors.New("contract tx does not contain a P2SH contract payment")
+		return nil, errors.New("contract tx does not contain a P2SH contract payment")
 	}
 
 	refundAddress, err := getRawChangeAddress(testnet, rpcclient)
 	if err != nil {
-		return result, fmt.Errorf("getrawchangeaddress: %v", err)
+		return nil, fmt.Errorf("getrawchangeaddress: %v", err)
 	}
 	refundOutScript, err := txscript.PayToAddrScript(refundAddress)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	refundAddr, err := ltcutil.NewAddressPubKeyHash(pushes.RefundHash160[:], chainParams)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	refundTx := wire.NewMsgTx(txVersion)
@@ -104,7 +102,7 @@ func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.
 	refundFee := txrules.FeeForSerializeSize(feePerKb, refundSize)
 	refundTx.TxOut[0].Value = contractTx.TxOut[contractOutPoint.Index].Value - int64(refundFee)
 	if txrules.IsDustOutput(refundTx.TxOut[0], minFeePerKb) {
-		return result, fmt.Errorf("refund output value of %v is dust", ltcutil.Amount(refundTx.TxOut[0].Value))
+		return nil, fmt.Errorf("refund output value of %v is dust", ltcutil.Amount(refundTx.TxOut[0].Value))
 	}
 
 	txIn := wire.NewTxIn(&contractOutPoint, nil, nil)
@@ -113,11 +111,11 @@ func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.
 
 	refundSig, refundPubKey, err := createSig(testnet, refundTx, 0, contract, refundAddr, rpcclient)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	refundSigScript, err := refundP2SHContract(contract, refundSig, refundPubKey)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	refundTx.TxIn[0].SignatureScript = refundSigScript
 
@@ -126,11 +124,11 @@ func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.
 			refundTx, 0, txscript.StandardVerifyFlags, txscript.NewSigCache(10),
 			txscript.NewTxSigHashes(refundTx), contractTx.TxOut[contractOutPoint.Index].Value)
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 		err = e.Execute()
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 	}
 
@@ -142,6 +140,8 @@ func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (libs.
 	var refundTxHash chainhash.Hash
 	refundTxHash = refundTx.TxHash()
 	strRefundTxHash := refundTxHash.String()
+
+	var result = &libs.RefundResult{}
 
 	result.RefundTx = strRefundTx
 	result.RefundTxHash = strRefundTxHash

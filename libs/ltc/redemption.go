@@ -20,42 +20,40 @@ import (
 
 // Build a transaction that can redeem the coins in the passed in contract using
 // the (shared) secret
-func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.RedeemResult, error) {
-	var result = libs.RedeemResult{}
-
+func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs.RedeemResult, error) {
 	chainParams := getChainParams(testnet)
 
 	contract, err := hex.DecodeString(params.Contract)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract: %v", err)
+		return nil, fmt.Errorf("failed to decode contract: %v", err)
 	}
 
 	contractTxBytes, err := hex.DecodeString(params.ContractTx)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return nil, fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
 	var contractTx wire.MsgTx
 	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return nil, fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
 
 	secret, err := hex.DecodeString(params.Secret)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode secret: %v", err)
+		return nil, fmt.Errorf("failed to decode secret: %v", err)
 	}
 
 	pushes, err := txscript.ExtractAtomicSwapDataPushes(0, contract)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	if pushes == nil {
-		return result, errors.New("contract is not an atomic swap script recognized by this tool")
+		return nil, errors.New("contract is not an atomic swap script recognized by this tool")
 	}
 	recipientAddr, err := ltcutil.NewAddressPubKeyHash(pushes.RecipientHash160[:],
 		chainParams)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	contractHash := ltcutil.Hash160(contract)
 	contractOut := -1
@@ -68,12 +66,12 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.
 		}
 	}
 	if contractOut == -1 {
-		return result, errors.New("transaction does not contain a contract output")
+		return nil, errors.New("transaction does not contain a contract output")
 	}
 
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	defer func() {
 		rpcclient.Shutdown()
@@ -82,11 +80,11 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.
 
 	addr, err := getRawChangeAddress(testnet, rpcclient)
 	if err != nil {
-		return result, fmt.Errorf("getrawchangeaddres: %v", err)
+		return nil, fmt.Errorf("getrawchangeaddres: %v", err)
 	}
 	outScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	contractTxHash := contractTx.TxHash()
@@ -97,7 +95,7 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.
 
 	feePerKb, minFeePerKb, err := getFeePerKb(rpcclient)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	redeemTx := wire.NewMsgTx(txVersion)
@@ -108,16 +106,16 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.
 	redeemFee := txrules.FeeForSerializeSize(feePerKb, redeemSize)
 	redeemTx.TxOut[0].Value = contractTx.TxOut[contractOut].Value - int64(redeemFee)
 	if txrules.IsDustOutput(redeemTx.TxOut[0], minFeePerKb) {
-		return result, fmt.Errorf("redeem output value of %v is dust", ltcutil.Amount(redeemTx.TxOut[0].Value))
+		return nil, fmt.Errorf("redeem output value of %v is dust", ltcutil.Amount(redeemTx.TxOut[0].Value))
 	}
 
 	redeemSig, redeemPubKey, err := createSig(testnet, redeemTx, 0, contract, recipientAddr, rpcclient)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	redeemSigScript, err := redeemP2SHContract(contract, redeemSig, redeemPubKey, secret)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	redeemTx.TxIn[0].SignatureScript = redeemSigScript
 
@@ -126,11 +124,11 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.
 			redeemTx, 0, txscript.StandardVerifyFlags, txscript.NewSigCache(10),
 			txscript.NewTxSigHashes(redeemTx), contractTx.TxOut[contractOut].Value)
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 		err = e.Execute()
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 	}
 
@@ -142,6 +140,8 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (libs.
 	var redeemTxHash chainhash.Hash
 	redeemTxHash = redeemTx.TxHash()
 	strRedeemTxHash := redeemTxHash.String()
+
+	var result = &libs.RedeemResult{}
 
 	result.RedeemTx = strRefundTx
 	result.RedeemTxHash = strRedeemTxHash

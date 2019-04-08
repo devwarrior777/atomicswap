@@ -19,23 +19,21 @@ import (
 
 // initiate creates a new secret then builds a contract & a contract transaction depending
 // upon that secret
-func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (libs.InitiateResult, error) {
-	var result = libs.InitiateResult{}
-
+func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*libs.InitiateResult, error) {
 	chainParams := getChainParams(testnet)
 
 	cp2Addr, err := ltcutil.DecodeAddress(params.CP2Addr, chainParams)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode participant address: %v", err)
+		return nil, fmt.Errorf("failed to decode participant address: %v", err)
 	}
 	if !cp2Addr.IsForNet(chainParams) {
-		return result, fmt.Errorf("participant address is not "+
+		return nil, fmt.Errorf("participant address is not "+
 			"intended for use on %v", chainParams.Name)
 	}
 
 	cp2AddrP2PKH, ok := cp2Addr.(*ltcutil.AddressPubKeyHash)
 	if !ok {
-		return result, errors.New("participant address is not P2PKH")
+		return nil, errors.New("participant address is not P2PKH")
 	}
 
 	cp2Amount := ltcutil.Amount(params.CP2Amount)
@@ -43,7 +41,7 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (l
 	var secret32 [secretSize]byte
 	_, err = rand.Read(secret32[:])
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	secret := make([]byte, secretSize)
 	copy(secret, secret32[:])
@@ -56,7 +54,7 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (l
 
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	defer func() {
 		rpcclient.Shutdown()
@@ -70,7 +68,7 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (l
 		secretHash: secretHash,
 	})
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	contractFeePerKb := calcFeePerKb(b.contractFee, b.contractTx.SerializeSize())
@@ -83,6 +81,8 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (l
 	var contractTxHash chainhash.Hash
 	contractTxHash = b.contractTx.TxHash()
 	strContractTxHash := contractTxHash.String()
+
+	var result = &libs.InitiateResult{}
 
 	result.Secret = hex.EncodeToString(secret)
 	result.SecretHash = hex.EncodeToString(secretHash)

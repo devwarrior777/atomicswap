@@ -21,32 +21,30 @@ import (
 // participate builds a contract & a contract transaction depending upon the hash of the
 // (shared) secret. The participant will know the secret only when initiator redeems the
 // contract made here
-func participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (libs.ParticipateResult, error) {
-	var result = libs.ParticipateResult{}
-
+func participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (*libs.ParticipateResult, error) {
 	chainParams := getChainParams(testnet)
 
 	cp1Addr, err := xzcutil.DecodeAddress(params.CP1Addr, chainParams)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode initiator address: %v", err)
+		return nil, fmt.Errorf("failed to decode initiator address: %v", err)
 	}
 	if !cp1Addr.IsForNet(chainParams) {
-		return result, fmt.Errorf("initiator address is not intended for use on %v", chainParams.Name)
+		return nil, fmt.Errorf("initiator address is not intended for use on %v", chainParams.Name)
 	}
 
 	cp1Address, ok := cp1Addr.(*xzcutil.AddressPubKeyHash)
 	if !ok {
-		return result, errors.New("initiator address is not P2PKH")
+		return nil, errors.New("initiator address is not P2PKH")
 	}
 
 	cp1Amount := xzcutil.Amount(params.CP1Amount)
 
 	secretHashBytes, err := hex.DecodeString(params.SecretHash)
 	if err != nil {
-		return result, errors.New("secret hash must be hex encoded")
+		return nil, errors.New("secret hash must be hex encoded")
 	}
 	if len(secretHashBytes) != sha256.Size {
-		return result, errors.New("secret hash has wrong size")
+		return nil, errors.New("secret hash has wrong size")
 	}
 
 	// locktime after 500,000,000 (Tue Nov  5 00:53:20 1985 UTC) is interpreted
@@ -56,7 +54,7 @@ func participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipatePara
 
 	rpcclient, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	defer func() {
 		rpcclient.Shutdown()
@@ -70,7 +68,7 @@ func participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipatePara
 		secretHash: secretHashBytes,
 	})
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	contractFeePerKb := calcFeePerKb(b.contractFee, b.contractTx.SerializeSize())
@@ -83,6 +81,8 @@ func participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipatePara
 	var contractTxHash chainhash.Hash
 	contractTxHash = b.contractTx.TxHash()
 	strContractTxHash := contractTxHash.String()
+
+	var result = &libs.ParticipateResult{}
 
 	result.Contract = hex.EncodeToString(b.contract)
 	result.ContractP2SH = b.contractP2SH.EncodeAddress()

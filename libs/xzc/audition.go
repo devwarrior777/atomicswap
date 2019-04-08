@@ -18,25 +18,23 @@ import (
 )
 
 // auditContract pulls out information from the counterparty's contract
-func auditContract(testnet bool, params libs.AuditParams) (libs.AuditResult, error) {
-	result := libs.AuditResult{}
-
+func auditContract(testnet bool, params libs.AuditParams) (*libs.AuditResult, error) {
 	chainParams := getChainParams(testnet)
 
 	contract, err := hex.DecodeString(params.Contract)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract: %v", err)
+		return nil, fmt.Errorf("failed to decode contract: %v", err)
 	}
 
 	contractTxBytes, err := hex.DecodeString(params.ContractTx)
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return nil, fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
 
 	var contractTx wire.MsgTx
 	err = contractTx.Deserialize(bytes.NewReader(contractTxBytes))
 	if err != nil {
-		return result, fmt.Errorf("failed to decode contract transaction: %v", err)
+		return nil, fmt.Errorf("failed to decode contract transaction: %v", err)
 	}
 
 	contractHash160 := xzcutil.Hash160(contract)
@@ -52,34 +50,36 @@ func auditContract(testnet bool, params libs.AuditParams) (libs.AuditResult, err
 		}
 	}
 	if contractOut == -1 {
-		return result, errors.New("transaction does not contain the contract output")
+		return nil, errors.New("transaction does not contain the contract output")
 	}
 
 	pushes, err := txscript.ExtractAtomicSwapDataPushes(contract)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	if pushes == nil {
-		return result, errors.New("contract is not an atomic swap script recognized by this tool")
+		return nil, errors.New("contract is not an atomic swap script recognized by this tool")
 	}
 	if pushes.SecretSize != secretSize {
-		return result, fmt.Errorf("contract specifies strange secret size %v", pushes.SecretSize)
+		return nil, fmt.Errorf("contract specifies strange secret size %v", pushes.SecretSize)
 	}
 
 	contractAddr, err := xzcutil.NewAddressScriptHash(contract, chainParams)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	recipientAddr, err := xzcutil.NewAddressPubKeyHash(pushes.RecipientHash160[:],
 		chainParams)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	refundAddr, err := xzcutil.NewAddressPubKeyHash(pushes.RefundHash160[:],
 		chainParams)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
+
+	result := &libs.AuditResult{}
 
 	result.ContractAddress = contractAddr.EncodeAddress()
 	result.ContractAmount = contractTx.TxOut[contractOut].Value

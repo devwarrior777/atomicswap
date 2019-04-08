@@ -173,7 +173,7 @@ func initiate(args []string) error {
 	params.CP2Addr = args[1]
 	params.CP2Amount = int64(amount)
 
-	var result libs.InitiateResult
+	var result *libs.InitiateResult
 	result, err = xzc.Initiate(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Initiate: %v", err)
@@ -183,7 +183,7 @@ func initiate(args []string) error {
 	refundParams.Contract = result.Contract
 	refundParams.ContractTx = result.ContractTx
 
-	var refundResult libs.RefundResult
+	var refundResult *libs.RefundResult
 	refundResult, err = xzc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
 		return fmt.Errorf("Initiate: %v", err)
@@ -241,7 +241,7 @@ func participate(args []string) error {
 	params.CP1Addr = args[1]
 	params.CP1Amount = int64(amount)
 
-	var result libs.ParticipateResult
+	var result *libs.ParticipateResult
 	result, err = xzc.Participate(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Participate: %v", err)
@@ -251,7 +251,7 @@ func participate(args []string) error {
 	refundParams.Contract = result.Contract
 	refundParams.ContractTx = result.ContractTx
 
-	var refundResult libs.RefundResult
+	var refundResult *libs.RefundResult
 	refundResult, err = xzc.Refund(*testnetFlag, rpcinfo, refundParams)
 	if err != nil {
 		return fmt.Errorf("Initiate: %v", err)
@@ -298,7 +298,7 @@ func redeem(args []string) error {
 	params.ContractTx = args[2]
 	params.Secret = args[3]
 
-	var result libs.RedeemResult
+	var result *libs.RedeemResult
 	result, err = xzc.Redeem(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Redeem: %v", err)
@@ -338,7 +338,7 @@ func refund(args []string) error {
 	params.Contract = args[1]
 	params.ContractTx = args[2]
 
-	var result libs.RefundResult
+	var result *libs.RefundResult
 	result, err = xzc.Refund(*testnetFlag, rpcinfo, params)
 	if err != nil {
 		return fmt.Errorf("Refund: %v", err)
@@ -379,7 +379,7 @@ func auditContract(args []string) error {
 	params.Contract = args[1]
 	params.ContractTx = args[2]
 
-	var result libs.AuditResult
+	var result *libs.AuditResult
 	result, err := xzc.AuditContract(*testnetFlag, params)
 	if err != nil {
 		return err
