@@ -1,0 +1,10 @@
+#  --cpp_out=OUT_DIR           Generate C++ header and source.
+#  --csharp_out=OUT_DIR        Generate C# source file.
+#  --java_out=OUT_DIR          Generate Java source file.
+#  --js_out=OUT_DIR            Generate JavaScript source.
+#  --objc_out=OUT_DIR          Generate Objective C header and source.
+#  --php_out=OUT_DIR           Generate PHP source file.
+#  --python_out=OUT_DIR        Generate Python source file.
+#  --ruby_out=OUT_DIR          Generate Ruby source file.
+
+protoc [lang_out=OUT_DIR] atomicswap.proto

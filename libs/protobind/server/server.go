@@ -102,6 +102,13 @@ func (s *swapLibServer) Audit(ctx context.Context, request *bnd.AuditRequest) (*
 	return response, nil
 }
 
+func (s *swapLibServer) GetTx(ctx context.Context, request *bnd.GetTxRequest) (*bnd.GetTxResponse, error) {
+	// response := getTx(request)
+	response := &bnd.GetTxResponse{}
+	log.Printf("GetTx\n")
+	return response, nil
+}
+
 //////////
 // MAIN //
 //////////

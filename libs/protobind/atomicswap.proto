@@ -207,6 +207,30 @@ message AuditResponse {
 	string errstr = 15;
 }
 
+message GetTxRequest {
+	COIN coin = 1;
+	bool testnet = 2;
+
+	string hostport = 5;
+	string rpcuser = 6;
+	string rpcpass = 7;
+	string certs = 8;
+
+	string txid = 9;
+}
+
+message GetTxResponse {
+	uint64 confirmations = 5;
+	string blockhash = 6;
+	int32 blockindex = 7;
+	uint64 blocktime = 8;
+	uint64 time = 9;
+	uint64 time_received = 10;
+	string hex = 11;
+
+	ERRNO errorno = 14;
+	string errstr = 15;
+}
 
 //TODO: Implement golang side server so other language bindings can access as client
 service SwapLib {
@@ -219,5 +243,6 @@ service SwapLib {
 	rpc Publish(PublishRequest) returns(PublishResponse);
 	rpc ExtractSecret(ExtractSecretRequest) returns(ExtractSecretResponse);
 	rpc Audit(AuditRequest) returns(AuditResponse);
+	rpc GetTx(GetTxRequest) returns(GetTxResponse);
 	//...
 }
