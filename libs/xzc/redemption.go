@@ -79,6 +79,12 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 		rpcclient.WaitForShutdown()
 	}()
 
+	err = walletLock(rpcclient, rpcinfo.WalletPass, 1)
+	if err != nil {
+		return nil, err
+	}
+	defer walletUnlock(rpcclient, rpcinfo.WalletPass)
+
 	addr, err := getRawChangeAddress(testnet, rpcclient)
 	if err != nil {
 		return nil, fmt.Errorf("getrawchangeaddres: %v", err)

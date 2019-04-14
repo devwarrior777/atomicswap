@@ -5,15 +5,16 @@ The functionality here can be used directly by golang clients just by
 importing it:
 
 import (
+    "github.com/devwarrior777/atomicswap/libs"
     "github.com/devwarrior777/atomicswap/libs/ltc"
-	"github.com/devwarrior777/atomicswap/libs/xzc"
-	//...
+    "github.com/devwarrior777/atomicswap/libs/xzc"
+    //...
 )
 
 Other languages
 ---------------
 
-When the gRPC SwapServer is running this code will be on the server side of grpc.
+When the golang gRPC SwapServer is running it will be the server side of grpc.
 
 Client side you can generate into any language supported by grpc such as python,
 nodejs, etc.
@@ -25,7 +26,7 @@ A `pygen` tool will make python source binding in the `./python/` folder
 
 A `jsgen` tool will make javascript source bindings in the `./python/` folder
 
-Other langauges are shown in the `example_gen` file
+Other language generation protoc parameters are shown in the `example_gen` file
 
 You will need the `protoc-XXX.zip` compiler at: https://github.com/protocolbuffers/protobuf/releases
 

@@ -29,7 +29,8 @@ message PingWalletRPCRequest {
 	string hostport = 5;	// default localhost
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8;
+	string wpass = 8;
+	string certs = 9;
 }
 
 message PingWalletRPCResponse {
@@ -44,7 +45,8 @@ message NewAddressRequest {
 	string hostport = 5;	// default localhost
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8;
+	string wpass = 8;
+	string certs = 9;
 }
 
 message NewAddressResponse {
@@ -60,10 +62,11 @@ message InitiateRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8;
+	string wpass = 8;
+	string certs = 9;
 
-	string part_address = 9;
-	int64 amount = 10;		// "satoshis"
+	string part_address = 10;
+	int64 amount = 11;		// "satoshis"
 }
 
 message InitiateResponse {
@@ -87,11 +90,12 @@ message ParticipateRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8; // currently only needed for DCR
+	string wpass = 8;
+	string certs = 9;
 
-	string secrethash = 9;
-	string part_address = 10;
-	int64 amount = 11;		// "satoshis"
+	string secrethash = 10;
+	string part_address = 11;
+	int64 amount = 12;		// "satoshis"
 }
 
 message ParticipateResponse {
@@ -113,11 +117,12 @@ message RedeemRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8;
+	string wpass = 8;
+	string certs = 9;
 
-	string secret = 9;	
-	string contract = 10;
-	uint64 contract_tx = 11;
+	string secret = 10;	
+	string contract = 11;
+	uint64 contract_tx = 12;
 }
 
 message RedeemResponse {
@@ -137,10 +142,11 @@ message RefundRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8;
+	string wpass = 8;
+	string certs = 9;
 
-	string contract = 9;
-	uint64 contract_tx = 10;
+	string contract = 10;
+	uint64 contract_tx = 11;
 }
 
 message RefundResponse {
@@ -160,9 +166,10 @@ message PublishRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8;
+	string wpass = 8;
+	string certs = 9;
 
-	string tx = 9;
+	string tx = 10;
 }
 
 message PublishResponse {
@@ -214,9 +221,10 @@ message GetTxRequest {
 	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
-	string certs = 8;
+	string wpass = 8;
+	string certs = 9;
 
-	string txid = 9;
+	string txid = 10;
 }
 
 message GetTxResponse {
@@ -232,7 +240,9 @@ message GetTxResponse {
 	string errstr = 15;
 }
 
-//TODO: Implement golang side server so other language bindings can access as client
+// Swap Server
+// Implemented in golang
+// Other language bindings can access as client, see README
 service SwapLib {
 	rpc PingWalletRPC(PingWalletRPCRequest) returns(PingWalletRPCResponse);
 	rpc NewAddress(NewAddressRequest) returns(NewAddressResponse);

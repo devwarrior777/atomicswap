@@ -19,7 +19,7 @@ func pingrpc(testnet bool, rpcinfo libs.RPCInfo) error {
 		rpcclient.WaitForShutdown()
 	}()
 
-	_, err = getBlockCount(testnet, rpcclient)
+	_, err = getBlockCount(rpcclient)
 	if err != nil {
 		return err
 	}

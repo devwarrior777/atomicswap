@@ -55,6 +55,12 @@ func refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (*libs
 		rpcclient.WaitForShutdown()
 	}()
 
+	err = walletLock(rpcclient, rpcinfo.WalletPass, 1)
+	if err != nil {
+		return nil, err
+	}
+	defer walletUnlock(rpcclient, rpcinfo.WalletPass)
+
 	feePerKb, minFeePerKb, err := getFeePerKb(rpcclient)
 	if err != nil {
 		return nil, err

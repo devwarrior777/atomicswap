@@ -5,17 +5,20 @@ package libs
 // atomic swaps
 
 // RPCInfo is RPC information passed into commands
+// HostPort:	If no  port specified defaults to the coin's default
+// 				port for the network
 type RPCInfo struct {
-	User     string
-	Pass     string
-	HostPort string
-	Certs    string // DCR Wallet
+	User       string // RPC Username
+	Pass       string // RPC Password
+	HostPort   string // RPC host[:port] can be ipv4 [ipv6]
+	WalletPass string // Wallet-passphrase
+	Certs      string // DCR Wallet
 }
 
 //InitiateParams is passed to the Initiate function
 type InitiateParams struct {
-	CP2Addr   string
-	CP2Amount int64
+	CP2Addr   string // Counterparty 2 (Participant) Adddress
+	CP2Amount int64  // Amount (sats) to pay into Participant redeemable contract
 }
 
 //InitiateResult is returned from the Initiate function
@@ -33,8 +36,8 @@ type InitiateResult struct {
 //ParticipateParams is passed to the Participate command
 type ParticipateParams struct {
 	SecretHash string
-	CP1Addr    string
-	CP1Amount  int64
+	CP1Addr    string // Counterparty 1 (Initiator) contract Adddress
+	CP1Amount  int64  // Amount (sats) to pay into Initiator redeemable contract
 }
 
 //ParticipateResult is returned from the Participate command

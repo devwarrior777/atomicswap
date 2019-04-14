@@ -61,6 +61,12 @@ func participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipatePara
 		rpcclient.WaitForShutdown()
 	}()
 
+	err = walletLock(rpcclient, rpcinfo.WalletPass, 1)
+	if err != nil {
+		return nil, err
+	}
+	defer walletUnlock(rpcclient, rpcinfo.WalletPass)
+
 	b, err := buildContract(testnet, rpcclient, &contractArgs{
 		them:       cp1Address,
 		amount:     cp1Amount,

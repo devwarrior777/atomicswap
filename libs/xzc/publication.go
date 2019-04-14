@@ -35,7 +35,7 @@ func publish(testnet bool, rpcinfo libs.RPCInfo, tx string) (string, error) {
 		rpcclient.WaitForShutdown()
 	}()
 
-	txHash, err := sendRawTransaction(testnet, rpcclient, &broadcastTx)
+	txHash, err := sendRawTransaction(rpcclient, &broadcastTx)
 	if err != nil {
 		return "", err
 	}

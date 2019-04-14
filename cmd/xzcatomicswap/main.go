@@ -26,6 +26,7 @@ var (
 	rpcuserFlag = flagset.String("rpcuser", "", "username for wallet RPC authentication")
 	rpcpassFlag = flagset.String("rpcpass", "", "password for wallet RPC authentication")
 	testnetFlag = flagset.Bool("testnet", false, "use testnet network")
+	walletPass  = flagset.String("wpass", "", "wallet passphrase")
 )
 
 // There are two directions that the atomic swap can be performed, as the
@@ -163,6 +164,7 @@ func initiate(args []string) error {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+	rpcinfo.WalletPass = *walletPass
 
 	err = xzc.PingRPC(*testnetFlag, rpcinfo)
 	if err != nil {
@@ -230,6 +232,7 @@ func participate(args []string) error {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+	rpcinfo.WalletPass = *walletPass
 
 	err = xzc.PingRPC(*testnetFlag, rpcinfo)
 	if err != nil {
@@ -287,6 +290,7 @@ func redeem(args []string) error {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+	rpcinfo.WalletPass = *walletPass
 
 	err := xzc.PingRPC(*testnetFlag, rpcinfo)
 	if err != nil {
@@ -328,6 +332,7 @@ func refund(args []string) error {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.User = *rpcuserFlag
 	rpcinfo.Pass = *rpcpassFlag
+	rpcinfo.WalletPass = *walletPass
 
 	err := xzc.PingRPC(*testnetFlag, rpcinfo)
 	if err != nil {

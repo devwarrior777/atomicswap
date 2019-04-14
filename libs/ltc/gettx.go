@@ -14,7 +14,7 @@ func getTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (*libs.GetTxResult, 
 		rpcclient.WaitForShutdown()
 	}()
 
-	result, err := getTransaction(testnet, rpcclient, txid)
+	result, err := getTransaction(rpcclient, txid)
 	if err != nil {
 		return nil, err
 	}

@@ -31,7 +31,7 @@ func startRPC(testnet bool, rpcinfo libs.RPCInfo) (*rpc.Client, error) {
 		Host:         hostport,
 		User:         rpcinfo.User,
 		Pass:         rpcinfo.Pass,
-		DisableTLS:   true, //TODO: Should be a config option
+		DisableTLS:   true, // bitcoin-like coins abandoned SSL for RPC
 		HTTPPostMode: true,
 	}
 	client, err := rpc.New(connConfig, nil)
@@ -51,9 +51,40 @@ func stopRPC(client *rpc.Client) {
 // RPC funcs //
 ///////////////
 
+// walletLock allows access to an encrypted wallet for 't' seconds
+// If 'p' == "" (empty string) we assume the wallet is not encrypted
+func walletLock(rpcclient *rpc.Client, p string, t int) error {
+	if len(p) == 0 {
+		return nil
+	}
+	pass, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
+	timeout, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	params := []json.RawMessage{pass, timeout}
+	_, err = rpcclient.RawRequest("walletpassphrase", params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Re-lock an unlocked (encrypted) wallet
+// If 'p' == "" (empty string) we assume the wallet is not encrypted
+func walletUnlock(rpcclient *rpc.Client, p string) {
+	if len(p) == 0 {
+		return
+	}
+	_, _ = rpcclient.RawRequest("walletlock", nil)
+}
+
 // getBlockCount calls the getblockcount JSON-RPC method. It is
 // currently used as a simple 'ping' to discover if node RPC is available
-func getBlockCount(testnet bool, rpcclient *rpc.Client) (int, error) {
+func getBlockCount(rpcclient *rpc.Client) (int, error) {
 	rawResp, err := rpcclient.RawRequest("getblockcount", nil)
 	if err != nil {
 		return -1, err
@@ -66,7 +97,7 @@ func getBlockCount(testnet bool, rpcclient *rpc.Client) (int, error) {
 	return blockCount, nil
 }
 
-func getTransaction(testnet bool, rpcclient *rpc.Client, txid string) (*libs.GetTxResult, error) {
+func getTransaction(rpcclient *rpc.Client, txid string) (*libs.GetTxResult, error) {
 	txidBytes, err := json.Marshal(txid)
 	if err != nil {
 		return nil, err
@@ -326,7 +357,7 @@ func dpk(testnet bool, rpcclient *rpc.Client, addr xzcutil.Address) (wif *xzcuti
 	return w, nil
 }
 
-func sendRawTransaction(testnet bool, rpcclient *rpc.Client, tx *wire.MsgTx) (*chainhash.Hash, error) {
+func sendRawTransaction(rpcclient *rpc.Client, tx *wire.MsgTx) (*chainhash.Hash, error) {
 	txHash, err := rpcclient.SendRawTransaction(tx, false)
 	if err != nil {
 		return nil, fmt.Errorf("sendrawtransaction: %v", err)
