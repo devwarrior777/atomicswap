@@ -19,10 +19,11 @@ func pingrpc(testnet bool, rpcinfo libs.RPCInfo) error {
 		rpcclient.WaitForShutdown()
 	}()
 
-	_, err = getBlockCount(rpcclient)
+	err = walletLock(rpcclient, rpcinfo.WalletPass, 1)
 	if err != nil {
 		return err
 	}
+	walletUnlock(rpcclient, rpcinfo.WalletPass)
 
 	return nil
 }
