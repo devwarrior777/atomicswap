@@ -171,7 +171,10 @@ func initiate(args []string) error {
 		return fmt.Errorf("Ping RPC: error: %v", err)
 	}
 
+	secret := libs.GetRand32()
+
 	var params libs.InitiateParams
+	params.Secret = secret
 	params.CP2Addr = args[1]
 	params.CP2Amount = int64(amount)
 
@@ -191,7 +194,7 @@ func initiate(args []string) error {
 		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	fmt.Printf("Secret:      %s\n", result.Secret)
+	fmt.Printf("Secret:      %s\n", secret)
 	fmt.Printf("Secret hash: %s\n\n", result.SecretHash)
 	fmt.Printf("Contract fee: %d (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
 	fmt.Printf("Refund fee:   %v (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)

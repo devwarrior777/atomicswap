@@ -1,5 +1,11 @@
 package libs
 
+import (
+	"encoding/hex"
+	"math/rand"
+	"time"
+)
+
 // These are the common structures used with all the swap coins
 // for making transactions and other wallet functionality for
 // atomic swaps
@@ -17,13 +23,13 @@ type RPCInfo struct {
 
 //InitiateParams is passed to the Initiate function
 type InitiateParams struct {
+	Secret    string // Shared secret
 	CP2Addr   string // Counterparty 2 (Participant) Adddress
 	CP2Amount int64  // Amount (sats) to pay into Participant redeemable contract
 }
 
 //InitiateResult is returned from the Initiate function
 type InitiateResult struct {
-	Secret           string
 	SecretHash       string
 	Contract         string
 	ContractP2SH     string
@@ -104,4 +110,12 @@ type GetTxResult struct {
 	Time          uint64
 	TimeReceived  uint64
 	Hex           string
+}
+
+// getRand32 creates a 32-'byte' pseudo random hex string
+func GetRand32() string {
+	src := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, 32)
+	_, _ = src.Read(b)
+	return hex.EncodeToString(b)[:]
 }

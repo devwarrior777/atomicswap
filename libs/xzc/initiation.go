@@ -6,7 +6,7 @@ package xzc
 
 import (
 	"bytes"
-	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -39,14 +39,14 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*
 
 	cp2Amount := xzcutil.Amount(params.CP2Amount)
 
-	var secret32 [secretSize]byte
-	_, err = rand.Read(secret32[:])
+	secret, err := hex.DecodeString(params.Secret)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("secret must be hex encoded")
 	}
-	secret := make([]byte, secretSize)
-	copy(secret, secret32[:])
-	secretHash := sha256Hash(secret[:])
+	if len(secret) != sha256.Size {
+		return nil, errors.New("secret has wrong size")
+	}
+	secretHash := sha256Hash(secret)
 
 	// locktime after 500,000,000 (Tue Nov  5 00:53:20 1985 UTC) is interpreted
 	// as a unix time rather than a block height.
@@ -91,7 +91,7 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*
 
 	var result = &libs.InitiateResult{}
 
-	result.Secret = hex.EncodeToString(secret)
+	// result.Secret = hex.EncodeToString(secret)
 	result.SecretHash = hex.EncodeToString(secretHash)
 	result.Contract = hex.EncodeToString(b.contract)
 	result.ContractP2SH = b.contractP2SH.EncodeAddress()

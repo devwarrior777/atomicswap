@@ -1,8 +1,10 @@
 package main
 
+// THIS WILL BE REPLACED WITH BETTER I/F
+
 //
 // For Golang client - ignore this file as we do not need a server.
-// import the libs/<COIN> packages directly
+// import the libs & libs/<COIN> packages directly
 //
 // For node, python, etc. make client bindings for your language
 // using the atomicswap.proto as the definitions
