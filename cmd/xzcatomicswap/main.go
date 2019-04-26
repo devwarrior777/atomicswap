@@ -172,9 +172,13 @@ func initiate(args []string) error {
 	}
 
 	secret := libs.GetRand32()
+	secretHash, err := libs.Hash256(secret)
+	if err != nil {
+		return errors.New("cannot generate a secret hash")
+	}
 
 	var params libs.InitiateParams
-	params.Secret = secret
+	params.SecretHash = secretHash
 	params.CP2Addr = args[1]
 	params.CP2Amount = int64(amount)
 
@@ -195,7 +199,7 @@ func initiate(args []string) error {
 	}
 
 	fmt.Printf("Secret:      %s\n", secret)
-	fmt.Printf("Secret hash: %s\n\n", result.SecretHash)
+	fmt.Printf("Secret hash: %s\n\n", secretHash)
 	fmt.Printf("Contract fee: %d (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
 	fmt.Printf("Refund fee:   %v (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%s):\n", result.ContractP2SH)

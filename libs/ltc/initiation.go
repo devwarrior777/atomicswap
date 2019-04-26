@@ -17,8 +17,8 @@ import (
 	"github.com/ltcsuite/ltcutil"
 )
 
-// initiate creates a new secret then builds a contract & a contract transaction depending
-// upon that secret
+// initiate builds a contract & a contract transaction depending on the secret hash parameter
+// passed in
 func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*libs.InitiateResult, error) {
 	chainParams := getChainParams(testnet)
 
@@ -38,14 +38,13 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*
 
 	cp2Amount := ltcutil.Amount(params.CP2Amount)
 
-	secret, err := hex.DecodeString(params.Secret)
+	secretHash, err := hex.DecodeString(params.SecretHash)
 	if err != nil {
-		return nil, errors.New("secret must be hex encoded")
+		return nil, errors.New("secret hash must be hex encoded")
 	}
-	if len(secret) != sha256.Size {
-		return nil, errors.New("secret has wrong size")
+	if len(secretHash) != sha256.Size {
+		return nil, errors.New("secret hash has wrong size")
 	}
-	secretHash := sha256Hash(secret)
 
 	// locktime after 500,000,000 (Tue Nov  5 00:53:20 1985 UTC) is interpreted
 	// as a unix time rather than a block height.
@@ -90,8 +89,6 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*
 
 	var result = &libs.InitiateResult{}
 
-	// result.Secret = hex.EncodeToString(secret)
-	result.SecretHash = hex.EncodeToString(secretHash)
 	result.Contract = hex.EncodeToString(b.contract)
 	result.ContractP2SH = b.contractP2SH.EncodeAddress()
 	result.ContractTx = strContractTx

@@ -1,10 +1,14 @@
 package libs
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"math/rand"
 	"time"
 )
+
+const hexstr32len = 32 * 2
 
 // These are the common structures used with all the swap coins
 // for making transactions and other wallet functionality for
@@ -23,14 +27,13 @@ type RPCInfo struct {
 
 //InitiateParams is passed to the Initiate function
 type InitiateParams struct {
-	Secret    string // Shared secret
-	CP2Addr   string // Counterparty 2 (Participant) Adddress
-	CP2Amount int64  // Amount (sats) to pay into Participant redeemable contract
+	SecretHash string // Hash of the shared secret
+	CP2Addr    string // Counterparty 2 (Participant) Adddress
+	CP2Amount  int64  // Amount (sats) to pay into Participant redeemable contract
 }
 
 //InitiateResult is returned from the Initiate function
 type InitiateResult struct {
-	SecretHash       string
 	Contract         string
 	ContractP2SH     string
 	ContractTx       string
@@ -112,10 +115,27 @@ type GetTxResult struct {
 	Hex           string
 }
 
-// getRand32 creates a 32-'byte' pseudo random hex string
+// GetRand32 creates a 32-'byte' pseudo random hex string
 func GetRand32() string {
 	src := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, 32)
 	_, _ = src.Read(b)
 	return hex.EncodeToString(b)[:]
+}
+
+// Hash256 takes a 32-'byte' hex string and hashes the binary number
+// represented then outputs as a hex string
+func Hash256(s string) (string, error) {
+	if len(s) != hexstr32len {
+		return "", errors.New("hash256 - invalid input")
+	}
+	b, err := hex.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+	if len(b) != 32 {
+		return "", errors.New("hash256 - invalid input byte length")
+	}
+	h32 := sha256.Sum256(b)
+	return hex.EncodeToString(h32[:]), nil
 }
