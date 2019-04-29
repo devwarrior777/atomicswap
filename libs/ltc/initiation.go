@@ -95,6 +95,7 @@ func initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*
 	result.ContractTxHash = strContractTxHash
 	result.ContractFee = int64(b.contractFee)
 	result.ContractFeePerKb = contractFeePerKb
+	result.ContractRefundLocktime = locktime
 
 	return result, nil
 }

@@ -34,12 +34,13 @@ type InitiateParams struct {
 
 //InitiateResult is returned from the Initiate function
 type InitiateResult struct {
-	Contract         string
-	ContractP2SH     string
-	ContractTx       string
-	ContractTxHash   string
-	ContractFee      int64
-	ContractFeePerKb float64
+	Contract               string
+	ContractP2SH           string
+	ContractTx             string
+	ContractTxHash         string
+	ContractFee            int64
+	ContractFeePerKb       float64
+	ContractRefundLocktime int64
 }
 
 //ParticipateParams is passed to the Participate command
@@ -51,12 +52,13 @@ type ParticipateParams struct {
 
 //ParticipateResult is returned from the Participate command
 type ParticipateResult struct {
-	Contract         string
-	ContractP2SH     string
-	ContractTx       string
-	ContractTxHash   string
-	ContractFee      int64
-	ContractFeePerKb float64
+	Contract               string
+	ContractP2SH           string
+	ContractTx             string
+	ContractTxHash         string
+	ContractFee            int64
+	ContractFeePerKb       float64
+	ContractRefundLocktime int64
 }
 
 // RedeemParams is passed to the Redeem command
