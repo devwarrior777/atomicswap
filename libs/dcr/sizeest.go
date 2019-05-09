@@ -1,9 +1,10 @@
 // Copyright (c) 2016 The btcsuite developers
-// Copyright (c) 2016-2017 The Decred developers
+// Copyright (c) 2017/2019 The Decred developers
+// Copyright (c) 2018/2019 The DevCo developers
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
 
-package main
+package dcr
 
 import (
 	"github.com/decred/dcrd/txscript"
@@ -63,11 +64,7 @@ func inputSize(sigScriptSize int) int {
 // estimateRedeemSerializeSize returns a worst case serialize size estimates for
 // a transaction that redeems an atomic swap P2SH output.
 func estimateRedeemSerializeSize(contract []byte, txOuts []*wire.TxOut) int {
-	contractPush, err := txscript.NewScriptBuilder().AddData(contract).Script()
-	if err != nil {
-		// Should never be hit since this script does exceed the limits.
-		panic(err)
-	}
+	contractPush, _ := txscript.NewScriptBuilder().AddData(contract).Script()
 	contractPushSize := len(contractPush)
 
 	// 12 additional bytes are for version, locktime and expiry.
@@ -80,11 +77,7 @@ func estimateRedeemSerializeSize(contract []byte, txOuts []*wire.TxOut) int {
 // estimateRefundSerializeSize returns a worst case serialize size estimates for
 // a transaction that refunds an atomic swap P2SH output.
 func estimateRefundSerializeSize(contract []byte, txOuts []*wire.TxOut) int {
-	contractPush, err := txscript.NewScriptBuilder().AddData(contract).Script()
-	if err != nil {
-		// Should never be hit since this script does exceed the limits.
-		panic(err)
-	}
+	contractPush, _ := txscript.NewScriptBuilder().AddData(contract).Script()
 	contractPushSize := len(contractPush)
 
 	// 12 additional bytes are for version, locktime and expiry.

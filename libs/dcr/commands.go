@@ -15,6 +15,8 @@ import (
 
 const verify = true
 
+// const verify = false
+
 const verifyFlags = txscript.ScriptDiscourageUpgradableNops |
 	txscript.ScriptVerifyCleanStack |
 	txscript.ScriptVerifyCheckLockTimeVerify |
@@ -23,7 +25,7 @@ const verifyFlags = txscript.ScriptDiscourageUpgradableNops |
 
 const secretSize = 32
 
-const txVersion = 2
+const feePerKb = 1e5
 
 // PingRPC tests if wallet node RPC is available
 func PingRPC(testnet bool, rpcinfo libs.RPCInfo) error {
@@ -45,15 +47,15 @@ func Initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*
 // 	return participate(testnet, rpcinfo, params)
 // }
 
-// // Redeem command builds a transaction to redeem a contract
-// func Redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs.RedeemResult, error) {
-// 	return redeem(testnet, rpcinfo, params)
-// }
+// Redeem command builds a transaction to redeem a contract
+func Redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs.RedeemResult, error) {
+	return redeem(testnet, rpcinfo, params)
+}
 
-// // Refund command builds a refund transaction for an unredeemed contract
-// func Refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (*libs.RefundResult, error) {
-// 	return refund(testnet, rpcinfo, params)
-// }
+// Refund command builds a refund transaction for an unredeemed contract
+func Refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (*libs.RefundResult, error) {
+	return refund(testnet, rpcinfo, params)
+}
 
 // // AuditContract command
 // func AuditContract(testnet bool, params libs.AuditParams) (*libs.AuditResult, error) {

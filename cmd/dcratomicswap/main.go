@@ -185,27 +185,27 @@ func initiate(args []string) error {
 		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	// var refundParams libs.RefundParams
-	// refundParams.Contract = result.Contract
-	// refundParams.ContractTx = result.ContractTx
+	var refundParams libs.RefundParams
+	refundParams.Contract = result.Contract
+	refundParams.ContractTx = result.ContractTx
 
-	// var refundResult *libs.RefundResult
-	// refundResult, err = dcr.Refund(*testnetFlag, rpcinfo, refundParams)
-	// if err != nil {
-	// 	return fmt.Errorf("Initiate: %v", err)
-	// }
+	var refundResult *libs.RefundResult
+	refundResult, err = dcr.Refund(*testnetFlag, rpcinfo, refundParams)
+	if err != nil {
+		return fmt.Errorf("Initiate: %v", err)
+	}
 
 	fmt.Printf("Secret:      %s\n", secret)
 	fmt.Printf("Secret hash: %s\n\n", secretHash)
 	fmt.Printf("Contract fee: %d (%0.8f DCR/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	// fmt.Printf("Refund fee:   %v (%0.8f DCR/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
+	fmt.Printf("Refund fee:   %v (%0.8f DCR/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
 	fmt.Printf("%s\n\n", result.Contract)
 	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
 	fmt.Printf("%s\n\n", result.ContractTx)
 
-	// fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
-	// fmt.Printf("%s\n\n", refundResult.RefundTx)
+	fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
+	fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
@@ -290,43 +290,42 @@ func participate(args []string) error {
 }
 
 func redeem(args []string) error {
-	// var rpcinfo libs.RPCInfo
-	// rpcinfo.HostPort = *connectFlag
-	// rpcinfo.User = *rpcuserFlag
-	// rpcinfo.Pass = *rpcpassFlag
-	// rpcinfo.WalletPass = *walletPass
+	var rpcinfo libs.RPCInfo
+	rpcinfo.HostPort = *connectFlag
+	rpcinfo.Certs = *certFlag
+	rpcinfo.WalletPass = *walletPass
 
-	// err := dcr.PingRPC(*testnetFlag, rpcinfo)
-	// if err != nil {
-	// 	return fmt.Errorf("Ping RPC: error: %v", err)
-	// }
+	err := dcr.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
 
-	// var params libs.RedeemParams
-	// params.Contract = args[1]
-	// params.ContractTx = args[2]
-	// params.Secret = args[3]
+	var params libs.RedeemParams
+	params.Contract = args[1]
+	params.ContractTx = args[2]
+	params.Secret = args[3]
 
-	// var result *libs.RedeemResult
-	// result, err = dcr.Redeem(*testnetFlag, rpcinfo, params)
-	// if err != nil {
-	// 	return fmt.Errorf("Redeem: %v", err)
-	// }
+	var result *libs.RedeemResult
+	result, err = dcr.Redeem(*testnetFlag, rpcinfo, params)
+	if err != nil {
+		return fmt.Errorf("Redeem: %v", err)
+	}
 
-	// fmt.Printf("Redeem fee:   %d (%0.8f XZC/kB)\n\n", result.RedeemFee, result.RedeemFeePerKb)
-	// fmt.Printf("Redeem transaction (%s):\n", result.RedeemTxHash)
-	// fmt.Printf("%s\n\n", result.RedeemTx)
+	fmt.Printf("Redeem fee:   %d (%0.8f XZC/kB)\n\n", result.RedeemFee, result.RedeemFeePerKb)
+	fmt.Printf("Redeem transaction (%s):\n", result.RedeemTxHash)
+	fmt.Printf("%s\n\n", result.RedeemTx)
 
-	// doPublish, err := askPublishTx("redeem")
-	// if err != nil {
-	// 	return err
-	// }
-	// if doPublish {
-	// 	txHash, err := dcr.Publish(*testnetFlag, rpcinfo, result.RedeemTx)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	fmt.Printf("Published %s transaction (%s)\n", "redeem", txHash)
-	// }
+	doPublish, err := askPublishTx("redeem")
+	if err != nil {
+		return err
+	}
+	if doPublish {
+		txHash, err := dcr.Publish(*testnetFlag, rpcinfo, result.RedeemTx)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Published %s transaction (%s)\n", "redeem", txHash)
+	}
 
 	return nil
 }

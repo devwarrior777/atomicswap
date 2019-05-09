@@ -46,9 +46,9 @@ func (w *wallet) stopRPC() {
 	w.conn.Close()
 }
 
-////////////////
-// GRPC funcs //
-////////////////
+//////////////////////////////
+// Miscellaneous GRPC funcs //
+//////////////////////////////
 
 func (w *wallet) ping() error {
 	request := &walletrpc.PingRequest{}
