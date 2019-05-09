@@ -15,18 +15,9 @@ import (
 	"strings"
 
 	"github.com/decred/dcrd/dcrutil"
-	"github.com/decred/dcrd/txscript"
 	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/devwarrior777/atomicswap/libs/dcr"
 )
-
-const verify = true
-
-const verifyFlags = txscript.ScriptDiscourageUpgradableNops |
-	txscript.ScriptVerifyCleanStack |
-	txscript.ScriptVerifyCheckLockTimeVerify |
-	txscript.ScriptVerifyCheckSequenceVerify |
-	txscript.ScriptVerifySHA256
 
 var (
 	flagset     = flag.NewFlagSet("", flag.ExitOnError)
@@ -166,7 +157,6 @@ func initiate(args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Amount: %0.8f DCR\n", amount.ToDCR())
 
 	var rpcinfo libs.RPCInfo
 	rpcinfo.HostPort = *connectFlag
@@ -178,22 +168,22 @@ func initiate(args []string) error {
 		return fmt.Errorf("Ping RPC: error: %v", err)
 	}
 
-	// secret := libs.GetRand32()
-	// secretHash, err := libs.Hash256(secret)
-	// if err != nil {
-	// 	return errors.New("cannot generate a secret hash")
-	// }
+	secret := libs.GetRand32()
+	secretHash, err := libs.Hash256(secret)
+	if err != nil {
+		return errors.New("cannot generate a secret hash")
+	}
 
-	// var params libs.InitiateParams
-	// params.SecretHash = secretHash
-	// params.CP2Addr = args[1]
-	// params.CP2Amount = int64(amount)
+	var params libs.InitiateParams
+	params.SecretHash = secretHash
+	params.CP2Addr = args[1]
+	params.CP2Amount = int64(amount)
 
-	// var result *libs.InitiateResult
-	// result, err = dcr.Initiate(*testnetFlag, rpcinfo, params)
-	// if err != nil {
-	// 	return fmt.Errorf("Initiate: %v", err)
-	// }
+	var result *libs.InitiateResult
+	result, err = dcr.Initiate(*testnetFlag, rpcinfo, params)
+	if err != nil {
+		return fmt.Errorf("Initiate: %v", err)
+	}
 
 	// var refundParams libs.RefundParams
 	// refundParams.Contract = result.Contract
@@ -205,29 +195,29 @@ func initiate(args []string) error {
 	// 	return fmt.Errorf("Initiate: %v", err)
 	// }
 
-	// fmt.Printf("Secret:      %s\n", secret)
-	// fmt.Printf("Secret hash: %s\n\n", secretHash)
-	// fmt.Printf("Contract fee: %d (%0.8f DCR/kB)\n", result.ContractFee, result.ContractFeePerKb)
+	fmt.Printf("Secret:      %s\n", secret)
+	fmt.Printf("Secret hash: %s\n\n", secretHash)
+	fmt.Printf("Contract fee: %d (%0.8f DCR/kB)\n", result.ContractFee, result.ContractFeePerKb)
 	// fmt.Printf("Refund fee:   %v (%0.8f DCR/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
-	// fmt.Printf("Contract (%s):\n", result.ContractP2SH)
-	// fmt.Printf("%s\n\n", result.Contract)
-	// fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
-	// fmt.Printf("%s\n\n", result.ContractTx)
+	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
+	fmt.Printf("%s\n\n", result.Contract)
+	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
+	fmt.Printf("%s\n\n", result.ContractTx)
 
 	// fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
 	// fmt.Printf("%s\n\n", refundResult.RefundTx)
 
-	// doPublish, err := askPublishTx("contract")
-	// if err != nil {
-	// 	return err
-	// }
-	// if doPublish {
-	// 	txHash, err := dcr.Publish(*testnetFlag, rpcinfo, result.ContractTx)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	fmt.Printf("Published %s transaction (%s)\n", "contract", txHash)
-	// }
+	doPublish, err := askPublishTx("contract")
+	if err != nil {
+		return err
+	}
+	if doPublish {
+		txHash, err := dcr.Publish(*testnetFlag, rpcinfo, result.ContractTx)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Published %s transaction (%s)\n", "contract", txHash)
+	}
 
 	return nil
 }

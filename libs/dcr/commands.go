@@ -9,15 +9,21 @@ package dcr
 /////////////////////////////////////////////////////////////////////
 
 import (
+	"github.com/decred/dcrd/txscript"
 	"github.com/devwarrior777/atomicswap/libs"
 )
 
 const verify = true
 
+const verifyFlags = txscript.ScriptDiscourageUpgradableNops |
+	txscript.ScriptVerifyCleanStack |
+	txscript.ScriptVerifyCheckLockTimeVerify |
+	txscript.ScriptVerifyCheckSequenceVerify |
+	txscript.ScriptVerifySHA256
+
 const secretSize = 32
 
-//const txVersion = 2 // bitcoin 0.17 needs tx v2
-const txVersion = 1 // bitcoin 0.13.2 needs tx v1
+const txVersion = 2
 
 // PingRPC tests if wallet node RPC is available
 func PingRPC(testnet bool, rpcinfo libs.RPCInfo) error {
@@ -29,10 +35,10 @@ func PingRPC(testnet bool, rpcinfo libs.RPCInfo) error {
 // 	return newaddress(testnet, rpcinfo)
 // }
 
-// // Initiate command builds a P2SH contract and a transaction to fund it
-// func Initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*libs.InitiateResult, error) {
-// 	return initiate(testnet, rpcinfo, params)
-// }
+// Initiate command builds a P2SH contract and a transaction to fund it
+func Initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*libs.InitiateResult, error) {
+	return initiate(testnet, rpcinfo, params)
+}
 
 // // Participate command builds a P2SH contract and a transaction to fund it
 // func Participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (*libs.ParticipateResult, error) {
@@ -54,14 +60,14 @@ func PingRPC(testnet bool, rpcinfo libs.RPCInfo) error {
 // 	return auditContract(testnet, params)
 // }
 
-// // Publish command broadcasts a raw hex transaction
-// func Publish(testnet bool, rpcinfo libs.RPCInfo, tx string) (string, error) {
-// 	txhash, err := publish(testnet, rpcinfo, tx)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return txhash, nil
-// }
+// Publish command broadcasts a raw hex transaction
+func Publish(testnet bool, rpcinfo libs.RPCInfo, tx string) (string, error) {
+	txhash, err := publish(testnet, rpcinfo, tx)
+	if err != nil {
+		return "", err
+	}
+	return txhash, nil
+}
 
 // // ExtractSecret returns a secret from the scriptSig of a transaction redeeming a contract
 // func ExtractSecret(redemptionTx string, secretHash string) (string, error) {
