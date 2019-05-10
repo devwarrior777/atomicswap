@@ -68,15 +68,15 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 		return nil, err
 	}
 	contractHash := dcrutil.Hash160(contract)
-	contractOut := -1
+	contractOutIdx := -1
 	for i, out := range contractTx.TxOut {
 		sc, addrs, _, _ := txscript.ExtractPkScriptAddrs(out.Version, out.PkScript, chainParams)
 		if sc == txscript.ScriptHashTy && bytes.Equal(addrs[0].Hash160()[:], contractHash) {
-			contractOut = i
+			contractOutIdx = i
 			break
 		}
 	}
-	if contractOut == -1 {
+	if contractOutIdx == -1 {
 		return nil, errors.New("transaction does not contain a contract output")
 	}
 
@@ -95,6 +95,7 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("redeem nar: %s\n", nar.Address)
 	addr, err := dcrutil.DecodeAddress(nar.Address)
 	if err != nil {
 		return nil, err
@@ -107,7 +108,7 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	contractTxHash := contractTx.TxHash()
 	contractOutPoint := wire.OutPoint{
 		Hash:  contractTxHash,
-		Index: uint32(contractOut),
+		Index: uint32(contractOutIdx),
 		Tree:  0,
 	}
 
@@ -117,7 +118,7 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	redeemTx.AddTxOut(wire.NewTxOut(0, outScript)) // amount set below
 	redeemSize := estimateRedeemSerializeSize(contract, redeemTx.TxOut)
 	redeemFee := txrules.FeeForSerializeSize(feePerKb, redeemSize)
-	redeemTx.TxOut[0].Value = contractTx.TxOut[contractOut].Value - int64(redeemFee)
+	redeemTx.TxOut[0].Value = contractTx.TxOut[contractOutIdx].Value - int64(redeemFee)
 	if txrules.IsDustOutput(redeemTx.TxOut[0], feePerKb) {
 		return nil, fmt.Errorf("redeem output value of %v is dust", dcrutil.Amount(redeemTx.TxOut[0].Value))
 	}

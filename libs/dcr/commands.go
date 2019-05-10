@@ -4,9 +4,9 @@
 
 package dcr
 
-/////////////////////////////////////////////////////////////////////
-// Public command interface for the Zcoin atomic swap code library //
-/////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// Public command interface for the Decred atomic swap code library //
+//////////////////////////////////////////////////////////////////////
 
 import (
 	"github.com/decred/dcrd/txscript"
@@ -14,8 +14,6 @@ import (
 )
 
 const verify = true
-
-// const verify = false
 
 const verifyFlags = txscript.ScriptDiscourageUpgradableNops |
 	txscript.ScriptVerifyCleanStack |
@@ -42,10 +40,10 @@ func Initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*
 	return initiate(testnet, rpcinfo, params)
 }
 
-// // Participate command builds a P2SH contract and a transaction to fund it
-// func Participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (*libs.ParticipateResult, error) {
-// 	return participate(testnet, rpcinfo, params)
-// }
+// Participate command builds a P2SH contract and a transaction to fund it
+func Participate(testnet bool, rpcinfo libs.RPCInfo, params libs.ParticipateParams) (*libs.ParticipateResult, error) {
+	return participate(testnet, rpcinfo, params)
+}
 
 // Redeem command builds a transaction to redeem a contract
 func Redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs.RedeemResult, error) {
