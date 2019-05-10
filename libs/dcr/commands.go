@@ -30,10 +30,10 @@ func PingRPC(testnet bool, rpcinfo libs.RPCInfo) error {
 	return pingrpc(testnet, rpcinfo)
 }
 
-// // GetNewAddress gets a new address from the controlled wallet
-// func GetNewAddress(testnet bool, rpcinfo libs.RPCInfo) (string, error) {
-// 	return newaddress(testnet, rpcinfo)
-// }
+// GetNewAddress gets a new address from the controlled wallet
+func GetNewAddress(testnet bool, rpcinfo libs.RPCInfo) (string, error) {
+	return newaddress(testnet, rpcinfo)
+}
 
 // Initiate command builds a P2SH contract and a transaction to fund it
 func Initiate(testnet bool, rpcinfo libs.RPCInfo, params libs.InitiateParams) (*libs.InitiateResult, error) {
@@ -74,9 +74,9 @@ func Publish(testnet bool, rpcinfo libs.RPCInfo, tx string) (string, error) {
 // 	return extractSecret(redemptionTx, secretHash)
 // }
 
-// // GetTx gets info on a broadcasted transaction
-// func GetTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (*libs.GetTxResult, error) {
-// 	return getTx(testnet, rpcinfo, txid)
-// }
+// GetTx gets info on a broadcasted transaction
+func GetTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (int32, string, error) {
+	return getTx(testnet, rpcinfo, txid)
+}
 
 //...

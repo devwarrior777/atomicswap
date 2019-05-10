@@ -51,3 +51,16 @@ func sha256Hash(x []byte) []byte {
 func calcFeePerKb(absoluteFee dcrutil.Amount, serializeSize int) float64 {
 	return float64(absoluteFee) / float64(serializeSize) / 1e5
 }
+
+// reverse between byteslices representing wire and 'normal' hashes, ids
+func byteRev(in []byte) []byte {
+	inLen := len(in)
+	if inLen == 0 {
+		return in
+	}
+	out := make([]byte, inLen)
+	for i := 0; i < inLen; i++ {
+		out[i] = in[inLen-i-1]
+	}
+	return out
+}

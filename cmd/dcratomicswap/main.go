@@ -58,8 +58,10 @@ func init() {
 		fmt.Println("  participate <initiator address> <amount> <secret hash>")
 		fmt.Println("  redeem <contract> <contract transaction> <secret>")
 		fmt.Println("  refund <contract> <contract transaction>")
-		fmt.Println("  extractsecret <redemption transaction> <secret hash>")
-		fmt.Println("  auditcontract <contract> <contract transaction>")
+		fmt.Println("  extractsecret <redemption transaction> <secret hash> [NOT IMPLEMENTED]")
+		fmt.Println("  auditcontract <contract> <contract transaction>      [NOT IMPLEMENTED]")
+		fmt.Println("  gettx <txid>")
+		fmt.Println("  newaddress")
 		fmt.Println()
 		fmt.Println("Flags:")
 		flagset.PrintDefaults()
@@ -109,6 +111,10 @@ func run() error {
 		cmdArgs = 2
 	case "auditcontract":
 		cmdArgs = 2
+	case "gettx":
+		cmdArgs = 1
+	case "newaddress":
+		cmdArgs = 0
 	default:
 		flagset.Usage()
 		return fmt.Errorf("unknown command %v", args[0])
@@ -142,6 +148,12 @@ func run() error {
 
 	case "auditcontract":
 		return auditContract(args)
+
+	case "gettx":
+		return getTx(args)
+
+	case "newaddress":
+		return newAddress(args)
 	}
 	flagset.Usage()
 	return fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
@@ -414,6 +426,50 @@ func auditContract(args []string) error {
 	// 	fmt.Printf("Locktime: block %v\n", locktime)
 	// }
 
+	return nil
+}
+
+func getTx(args []string) error {
+	var rpcinfo libs.RPCInfo
+	rpcinfo.HostPort = *connectFlag
+	rpcinfo.Certs = *certFlag
+	rpcinfo.WalletPass = *walletPass
+
+	err := dcr.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
+	txid := args[1]
+
+	confirmations, blockHash, err := dcr.GetTx(*testnetFlag, rpcinfo, txid)
+	if err != nil {
+		return fmt.Errorf("getTx: %v", err)
+	}
+	fmt.Printf("Confirmations: %d\n", confirmations)
+	if blockHash == "" {
+		blockHash = "Unknown"
+	}
+	fmt.Printf("Block hash:    %s\n", blockHash)
+	return nil
+}
+
+func newAddress(args []string) error {
+	var rpcinfo libs.RPCInfo
+	rpcinfo.HostPort = *connectFlag
+	rpcinfo.Certs = *certFlag
+	rpcinfo.WalletPass = *walletPass
+
+	err := dcr.PingRPC(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("Ping RPC: error: %v", err)
+	}
+
+	addr, err := dcr.GetNewAddress(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("GetNewAddress: error: %v", err)
+	}
+	fmt.Printf("%s\n", addr)
 	return nil
 }
 

@@ -18,11 +18,6 @@ import (
 	"github.com/decred/dcrwallet/rpc/walletrpc"
 	"github.com/decred/dcrwallet/wallet/txrules"
 	"github.com/devwarrior777/atomicswap/libs"
-	// "github.com/decred/dcrd/dcrec"
-	// "github.com/decred/dcrd/txscript"
-	// "github.com/decred/dcrd/wire"
-	// "github.com/decred/dcrutil"
-	// "github.com/decred/dcrwallet/wallet/txrules"
 )
 
 // Build a transaction that can redeem the coins in the passed in contract using
