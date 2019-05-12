@@ -8,9 +8,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/devwarrior777/atomicswap/libs"
 	"github.com/zcoinofficial/xzcd/chaincfg/chainhash"
@@ -316,38 +314,51 @@ func dpk(testnet bool, rpcclient *rpc.Client, addr xzcutil.Address) (wif *xzcuti
 		return nil, err
 	}
 	params := []json.RawMessage{param0}
-	// This should always fail the first time as Zcoin added a one-time authoriz-
-	// ation key returned in error string. Along with a warning. The idea is that
-	// inexperienced people are warned if scammers propose they use `dumpprivkey'
-	_, err = rpcclient.RawRequest("dumpprivkey", params)
-	if err == nil {
-		unexpected := errors.New("dpk: No authorization challenge")
-		return nil, unexpected
-	}
 
-	errStr := err.Error()
-	searchStr := "authorization code is: "
-	i0 := strings.Index(errStr, searchStr)
-	if i0 == -1 {
-		return nil, err
-	}
-	i := i0 + len(searchStr)
-	authStr := errStr[i : i+4]
-	//
-	param1, err := json.Marshal(authStr)
-	if err != nil {
-		return nil, err
-	}
-	params2 := []json.RawMessage{param0, param1}
-	rawResp2, err := rpcclient.RawRequest("dumpprivkey", params2)
+	//TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK
+	rawResponse, err := rpcclient.RawRequest("dumpprivkey", params)
 	if err != nil {
 		return nil, err
 	}
 	var sk string
-	err = json.Unmarshal(rawResp2, &sk)
+	err = json.Unmarshal(rawResponse, &sk)
 	if err != nil {
 		return nil, err
 	}
+
+	// // This should always fail the first time as Zcoin added a one-time authoriz-
+	// // ation key returned in error string. Along with a warning. The idea is that
+	// // inexperienced people are warned if scammers propose they use `dumpprivkey'
+	// _, err = rpcclient.RawRequest("dumpprivkey", params)
+	// if err == nil {
+	// 	unexpected := errors.New("dpk: No authorization challenge")
+	// 	return nil, unexpected
+	// }
+
+	// errStr := err.Error()
+	// searchStr := "authorization code is: "
+	// i0 := strings.Index(errStr, searchStr)
+	// if i0 == -1 {
+	// 	return nil, err
+	// }
+	// i := i0 + len(searchStr)
+	// authStr := errStr[i : i+4]
+	// //
+	// param1, err := json.Marshal(authStr)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// params2 := []json.RawMessage{param0, param1}
+	// rawResp2, err := rpcclient.RawRequest("dumpprivkey", params2)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// var sk string
+	// err = json.Unmarshal(rawResp2, &sk)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK TEMP HACK
 
 	w, err := xzcutil.DecodeWIF(sk)
 	if err != nil {

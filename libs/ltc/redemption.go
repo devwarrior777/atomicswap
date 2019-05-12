@@ -55,18 +55,29 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	if err != nil {
 		return nil, err
 	}
+	outScript, err := txscript.PayToAddrScript(recipientAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	contractHash := ltcutil.Hash160(contract)
-	contractOut := -1
+	contractOutIdx := -1
 	for i, out := range contractTx.TxOut {
 		sc, addrs, _, _ := txscript.ExtractPkScriptAddrs(out.PkScript, chainParams)
 		if sc == txscript.ScriptHashTy &&
 			bytes.Equal(addrs[0].(*ltcutil.AddressScriptHash).Hash160()[:], contractHash) {
-			contractOut = i
+			contractOutIdx = i
 			break
 		}
 	}
-	if contractOut == -1 {
+	if contractOutIdx == -1 {
 		return nil, errors.New("transaction does not contain a contract output")
+	}
+
+	contractTxHash := contractTx.TxHash()
+	contractOutPoint := wire.OutPoint{
+		Hash:  contractTxHash,
+		Index: uint32(contractOutIdx),
 	}
 
 	rpcclient, err := startRPC(testnet, rpcinfo)
@@ -84,21 +95,6 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	}
 	defer walletUnlock(rpcclient, rpcinfo.WalletPass)
 
-	addr, err := getRawChangeAddress(testnet, rpcclient)
-	if err != nil {
-		return nil, fmt.Errorf("getrawchangeaddres: %v", err)
-	}
-	outScript, err := txscript.PayToAddrScript(addr)
-	if err != nil {
-		return nil, err
-	}
-
-	contractTxHash := contractTx.TxHash()
-	contractOutPoint := wire.OutPoint{
-		Hash:  contractTxHash,
-		Index: uint32(contractOut),
-	}
-
 	feePerKb, minFeePerKb, err := getFeePerKb(rpcclient)
 	if err != nil {
 		return nil, err
@@ -110,7 +106,7 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	redeemTx.AddTxOut(wire.NewTxOut(0, outScript)) // amount set below
 	redeemSize := estimateRedeemSerializeSize(contract, redeemTx.TxOut)
 	redeemFee := txrules.FeeForSerializeSize(feePerKb, redeemSize)
-	redeemTx.TxOut[0].Value = contractTx.TxOut[contractOut].Value - int64(redeemFee)
+	redeemTx.TxOut[0].Value = contractTx.TxOut[contractOutIdx].Value - int64(redeemFee)
 	if txrules.IsDustOutput(redeemTx.TxOut[0], minFeePerKb) {
 		return nil, fmt.Errorf("redeem output value of %v is dust", ltcutil.Amount(redeemTx.TxOut[0].Value))
 	}
@@ -128,7 +124,7 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	if verify {
 		e, err := txscript.NewEngine(contractTx.TxOut[contractOutPoint.Index].PkScript,
 			redeemTx, 0, txscript.StandardVerifyFlags, txscript.NewSigCache(10),
-			txscript.NewTxSigHashes(redeemTx), contractTx.TxOut[contractOut].Value)
+			txscript.NewTxSigHashes(redeemTx), contractTx.TxOut[contractOutIdx].Value)
 		if err != nil {
 			return nil, err
 		}

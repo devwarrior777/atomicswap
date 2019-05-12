@@ -48,7 +48,6 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 		return nil, fmt.Errorf("failed to decode secret: %v", err)
 	}
 
-	//--->
 	pushes, err := txscript.ExtractAtomicSwapDataPushes(
 		txscript.DefaultScriptVersion, contract)
 	if err != nil {
@@ -75,30 +74,11 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 		return nil, errors.New("transaction does not contain a contract output")
 	}
 
-	wallet, err := startRPC(testnet, rpcinfo)
+	outScript, err := txscript.PayToAddrScript(recipientAddr)
 	if err != nil {
 		return nil, err
 	}
-	defer wallet.stopRPC()
-	ctx := context.Background()
-
-	nar, err := wallet.client.NextAddress(ctx, &walletrpc.NextAddressRequest{
-		Account:   0, // TODO
-		Kind:      walletrpc.NextAddressRequest_BIP0044_INTERNAL,
-		GapPolicy: walletrpc.NextAddressRequest_GAP_POLICY_WRAP,
-	})
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("redeem nar: %s\n", nar.Address)
-	addr, err := dcrutil.DecodeAddress(nar.Address)
-	if err != nil {
-		return nil, err
-	}
-	outScript, err := txscript.PayToAddrScript(addr)
-	if err != nil {
-		return nil, err
-	}
+	fmt.Printf("recipient address: %s\n", recipientAddr.EncodeAddress())
 
 	contractTxHash := contractTx.TxHash()
 	contractOutPoint := wire.OutPoint{
@@ -117,6 +97,13 @@ func redeem(testnet bool, rpcinfo libs.RPCInfo, params libs.RedeemParams) (*libs
 	if txrules.IsDustOutput(redeemTx.TxOut[0], feePerKb) {
 		return nil, fmt.Errorf("redeem output value of %v is dust", dcrutil.Amount(redeemTx.TxOut[0].Value))
 	}
+
+	wallet, err := startRPC(testnet, rpcinfo)
+	if err != nil {
+		return nil, err
+	}
+	defer wallet.stopRPC()
+	ctx := context.Background()
 
 	var buf bytes.Buffer
 	buf.Grow(redeemTx.SerializeSize())

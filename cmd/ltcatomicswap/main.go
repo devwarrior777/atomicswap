@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/devwarrior777/atomicswap/libs"
-	"github.com/devwarrior777/atomicswap/libs/ltc" // Use new libs/ltc pkg
+	"github.com/devwarrior777/atomicswap/libs/ltc"
 	"github.com/ltcsuite/ltcd/txscript"
 )
 
@@ -62,6 +62,8 @@ func init() {
 		fmt.Println("  refund <contract> <contract transaction>")
 		fmt.Println("  extractsecret <redemption transaction> <secret hash>")
 		fmt.Println("  auditcontract <contract> <contract transaction>")
+		fmt.Println("  gettx <txid>")
+		fmt.Println("  newaddress")
 		fmt.Println()
 		fmt.Println("Flags:")
 		flagset.PrintDefaults()
@@ -111,6 +113,10 @@ func run() error {
 		cmdArgs = 2
 	case "auditcontract":
 		cmdArgs = 2
+	case "gettx":
+		cmdArgs = 1
+	case "newaddress":
+		cmdArgs = 0
 	default:
 		flagset.Usage()
 		return fmt.Errorf("unknown command %v", args[0])
@@ -144,6 +150,12 @@ func run() error {
 
 	case "auditcontract":
 		return auditContract(args)
+
+	case "gettx":
+		return getTx(args)
+
+	case "newaddress":
+		return newAddress(args)
 	}
 	flagset.Usage()
 	return fmt.Errorf("unexpected argument: %s", flagset.Arg(0))
@@ -188,27 +200,13 @@ func initiate(args []string) error {
 		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	var refundParams libs.RefundParams
-	refundParams.Contract = result.Contract
-	refundParams.ContractTx = result.ContractTx
-
-	var refundResult *libs.RefundResult
-	refundResult, err = ltc.Refund(*testnetFlag, rpcinfo, refundParams)
-	if err != nil {
-		return fmt.Errorf("Initiate: %v", err)
-	}
-
 	fmt.Printf("Secret:      %s\n", secret)
 	fmt.Printf("Secret hash: %s\n\n", secretHash)
 	fmt.Printf("Contract fee: %d (%0.8f LTC/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	fmt.Printf("Refund fee:   %v (%0.8f LTC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
 	fmt.Printf("%s\n\n", result.Contract)
 	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
 	fmt.Printf("%s\n\n", result.ContractTx)
-
-	fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
-	fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
@@ -257,25 +255,11 @@ func participate(args []string) error {
 		return fmt.Errorf("Participate: %v", err)
 	}
 
-	var refundParams libs.RefundParams
-	refundParams.Contract = result.Contract
-	refundParams.ContractTx = result.ContractTx
-
-	var refundResult *libs.RefundResult
-	refundResult, err = ltc.Refund(*testnetFlag, rpcinfo, refundParams)
-	if err != nil {
-		return fmt.Errorf("Initiate: %v", err)
-	}
-
 	fmt.Printf("Contract fee: %d (%0.8f LTC/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	fmt.Printf("Refund fee:   %d (%0.8f LTC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
 	fmt.Printf("%s\n\n", result.Contract)
 	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
 	fmt.Printf("%s\n\n", result.ContractTx)
-
-	fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
-	fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
@@ -418,6 +402,44 @@ func auditContract(args []string) error {
 		fmt.Printf("Locktime: block %v\n", locktime)
 	}
 
+	return nil
+}
+
+func getTx(args []string) error {
+	var rpcinfo libs.RPCInfo
+	rpcinfo.HostPort = *connectFlag
+	rpcinfo.User = *rpcuserFlag
+	rpcinfo.Pass = *rpcpassFlag
+	rpcinfo.WalletPass = *walletPass
+
+	txid := args[1]
+
+	result, err := ltc.GetTx(*testnetFlag, rpcinfo, txid)
+	if err != nil {
+		return fmt.Errorf("getTx: %v", err)
+	}
+
+	fmt.Printf("Confirmations: %d\n", result.Confirmations)
+	blockHash := result.Blockhash
+	if blockHash == "" {
+		blockHash = "Unknown"
+	}
+	fmt.Printf("Block hash:    %s\n", blockHash)
+	return nil
+}
+
+func newAddress(args []string) error {
+	var rpcinfo libs.RPCInfo
+	rpcinfo.HostPort = *connectFlag
+	rpcinfo.User = *rpcuserFlag
+	rpcinfo.Pass = *rpcpassFlag
+	rpcinfo.WalletPass = *walletPass
+
+	addr, err := ltc.GetNewAddress(*testnetFlag, rpcinfo)
+	if err != nil {
+		return fmt.Errorf("GetNewAddress: error: %v", err)
+	}
+	fmt.Printf("%s\n", addr)
 	return nil
 }
 

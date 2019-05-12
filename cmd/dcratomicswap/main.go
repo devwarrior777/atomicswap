@@ -197,27 +197,13 @@ func initiate(args []string) error {
 		return fmt.Errorf("Initiate: %v", err)
 	}
 
-	// var refundParams libs.RefundParams
-	// refundParams.Contract = result.Contract
-	// refundParams.ContractTx = result.ContractTx
-
-	// var refundResult *libs.RefundResult
-	// refundResult, err = dcr.Refund(*testnetFlag, rpcinfo, refundParams)
-	// if err != nil {
-	// 	return fmt.Errorf("Initiate: %v", err)
-	// }
-
 	fmt.Printf("Secret:      %s\n", secret)
 	fmt.Printf("Secret hash: %s\n\n", secretHash)
 	fmt.Printf("Contract fee: %d (%0.8f DCR/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	// fmt.Printf("Refund fee:   %v (%0.8f DCR/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
 	fmt.Printf("%s\n\n", result.Contract)
 	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
 	fmt.Printf("%s\n\n", result.ContractTx)
-
-	// fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
-	// fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
@@ -265,25 +251,11 @@ func participate(args []string) error {
 		return fmt.Errorf("Participate: %v", err)
 	}
 
-	// var refundParams libs.RefundParams
-	// refundParams.Contract = result.Contract
-	// refundParams.ContractTx = result.ContractTx
-
-	// var refundResult *libs.RefundResult
-	// refundResult, err = dcr.Refund(*testnetFlag, rpcinfo, refundParams)
-	// if err != nil {
-	// 	return fmt.Errorf("Initiate: %v", err)
-	// }
-
 	fmt.Printf("Contract fee: %d (%0.8f XZC/kB)\n", result.ContractFee, result.ContractFeePerKb)
-	// fmt.Printf("Refund fee:   %d (%0.8f XZC/kB)\n\n", refundResult.RefundFee, refundResult.RefundFeePerKb)
 	fmt.Printf("Contract (%s):\n", result.ContractP2SH)
 	fmt.Printf("%s\n\n", result.Contract)
 	fmt.Printf("Contract transaction (%s):\n", result.ContractTxHash)
 	fmt.Printf("%s\n\n", result.ContractTx)
-
-	// fmt.Printf("Refund transaction (%s):\n", refundResult.RefundTxHash)
-	// fmt.Printf("%s\n\n", refundResult.RefundTx)
 
 	doPublish, err := askPublishTx("contract")
 	if err != nil {
@@ -383,49 +355,11 @@ func refund(args []string) error {
 
 func extractSecret(args []string) error {
 	fmt.Println("Not implemented")
-	// secret, err := dcr.ExtractSecret(args[1], args[2])
-	// if err != nil {
-	// 	return err
-	// }
-
-	// fmt.Printf("Contract shared secret: %s\n", secret)
-
 	return nil
 }
 
 func auditContract(args []string) error {
 	fmt.Println("Not implemented")
-	// var params libs.AuditParams
-	// params.Contract = args[1]
-	// params.ContractTx = args[2]
-
-	// var result *libs.AuditResult
-	// result, err := dcr.AuditContract(*testnetFlag, params)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// fmt.Printf("Contract address:        %s\n", result.ContractAddress)
-	// fmt.Printf("Contract value:          %v\n", dcr.Amount(result.ContractAmount))
-	// fmt.Printf("Recipient address:       %s\n", result.ContractRecipientAddress)
-	// fmt.Printf("Author's refund address: %s\n\n", result.ContractRefundAddress)
-
-	// fmt.Printf("Secret hash: %s\n\n", result.ContractSecretHash)
-
-	// locktime := result.ContractRefundLocktime
-	// if locktime >= int64(txscript.LockTimeThreshold) {
-	// 	t := time.Unix(locktime, 0)
-	// 	fmt.Printf("Locktime: %v\n", t.UTC())
-	// 	reachedAt := time.Until(t).Truncate(time.Second)
-	// 	if reachedAt > 0 {
-	// 		fmt.Printf("Locktime reached in %v\n", reachedAt)
-	// 	} else {
-	// 		fmt.Printf("Contract refund time lock has expired\n")
-	// 	}
-	// } else {
-	// 	fmt.Printf("Locktime: block %v\n", locktime)
-	// }
-
 	return nil
 }
 
@@ -434,11 +368,6 @@ func getTx(args []string) error {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.Certs = *certFlag
 	rpcinfo.WalletPass = *walletPass
-
-	err := dcr.PingRPC(*testnetFlag, rpcinfo)
-	if err != nil {
-		return fmt.Errorf("Ping RPC: error: %v", err)
-	}
 
 	txid := args[1]
 
@@ -459,11 +388,6 @@ func newAddress(args []string) error {
 	rpcinfo.HostPort = *connectFlag
 	rpcinfo.Certs = *certFlag
 	rpcinfo.WalletPass = *walletPass
-
-	err := dcr.PingRPC(*testnetFlag, rpcinfo)
-	if err != nil {
-		return fmt.Errorf("Ping RPC: error: %v", err)
-	}
 
 	addr, err := dcr.GetNewAddress(*testnetFlag, rpcinfo)
 	if err != nil {
