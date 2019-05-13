@@ -9,6 +9,8 @@ package dcr
 //////////////////////////////////////////////////////////////////////
 
 import (
+	"errors"
+
 	"github.com/decred/dcrd/txscript"
 	"github.com/devwarrior777/atomicswap/libs"
 )
@@ -55,10 +57,10 @@ func Refund(testnet bool, rpcinfo libs.RPCInfo, params libs.RefundParams) (*libs
 	return refund(testnet, rpcinfo, params)
 }
 
-// // AuditContract command
-// func AuditContract(testnet bool, params libs.AuditParams) (*libs.AuditResult, error) {
-// 	return auditContract(testnet, params)
-// }
+// AuditContract command
+func AuditContract(testnet bool, params libs.AuditParams) (*libs.AuditResult, error) {
+	return nil, errors.New("Not implemented")
+}
 
 // Publish command broadcasts a raw hex transaction
 func Publish(testnet bool, rpcinfo libs.RPCInfo, tx string) (string, error) {
@@ -69,13 +71,13 @@ func Publish(testnet bool, rpcinfo libs.RPCInfo, tx string) (string, error) {
 	return txhash, nil
 }
 
-// // ExtractSecret returns a secret from the scriptSig of a transaction redeeming a contract
-// func ExtractSecret(redemptionTx string, secretHash string) (string, error) {
-// 	return extractSecret(redemptionTx, secretHash)
-// }
+// ExtractSecret returns a secret from the scriptSig of a transaction redeeming a contract
+func ExtractSecret(redemptionTx string, secretHash string) (string, error) {
+	return "", errors.New("Not implemented")
+}
 
 // GetTx gets info on a broadcasted transaction
-func GetTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (int32, string, error) {
+func GetTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (*libs.GetTxResult, error) {
 	return getTx(testnet, rpcinfo, txid)
 }
 

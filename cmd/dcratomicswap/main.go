@@ -371,15 +371,12 @@ func getTx(args []string) error {
 
 	txid := args[1]
 
-	confirmations, blockHash, err := dcr.GetTx(*testnetFlag, rpcinfo, txid)
+	result, err := dcr.GetTx(*testnetFlag, rpcinfo, txid)
 	if err != nil {
 		return fmt.Errorf("getTx: %v", err)
 	}
-	fmt.Printf("Confirmations: %d\n", confirmations)
-	if blockHash == "" {
-		blockHash = "Unknown"
-	}
-	fmt.Printf("Block hash:    %s\n", blockHash)
+	fmt.Printf("Confirmations: %d\n", result.Confirmations)
+	fmt.Printf("Block hash:    %s\n", result.Blockhash)
 	return nil
 }
 

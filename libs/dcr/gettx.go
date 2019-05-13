@@ -11,19 +11,19 @@ import (
 
 const hexstr32 = 32 * 2
 
-func getTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (int32, string, error) {
+func getTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (*libs.GetTxResult, error) {
 	if len(txid) != hexstr32 {
-		return 0, "", errors.New("txid: bad length")
+		return nil, errors.New("txid: bad length")
 	}
 	txidBytes, err := hex.DecodeString(txid)
 	if err != nil {
-		return 0, "", err
+		return nil, err
 	}
 	wireTxHash := byteRev(txidBytes)
 
 	wallet, err := startRPC(testnet, rpcinfo)
 	if err != nil {
-		return 0, "", err
+		return nil, err
 	}
 	defer wallet.stopRPC()
 	ctx := context.Background()
@@ -33,10 +33,12 @@ func getTx(testnet bool, rpcinfo libs.RPCInfo, txid string) (int32, string, erro
 		TransactionHash: wireTxHash,
 	})
 	if err != nil {
-		return 0, "", err
+		return nil, err
 	}
 
-	confirmations := gtr.Confirmations
-	blockHash := hex.EncodeToString(byteRev(gtr.BlockHash))
-	return confirmations, blockHash, nil
+	result := &libs.GetTxResult{}
+	result.Confirmations = uint64(gtr.Confirmations)
+	result.Blockhash = hex.EncodeToString(byteRev(gtr.BlockHash))
+
+	return result, nil
 }
