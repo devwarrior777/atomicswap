@@ -7,6 +7,9 @@ package dcr
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+
+	"github.com/decred/dcrd/dcrutil"
 
 	"github.com/decred/dcrwallet/rpc/walletrpc"
 	"github.com/devwarrior777/atomicswap/libs"
@@ -26,7 +29,12 @@ func startRPC(testnet bool, rpcinfo libs.RPCInfo) (*wallet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("wallet server address: %v", err)
 	}
-	creds, err := credentials.NewClientTLSFromFile(rpcinfo.Certs, "")
+	certPath := rpcinfo.Certs
+	if certPath == "" {
+		//default path
+		certPath = filepath.Join(dcrutil.AppDataDir("dcrwallet", false), "rpc.cert")
+	}
+	creds, err := credentials.NewClientTLSFromFile(certPath, "")
 	if err != nil {
 		return nil, fmt.Errorf("open certificate: %v", err)
 	}
