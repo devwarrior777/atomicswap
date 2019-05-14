@@ -11,8 +11,10 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/devwarrior777/atomicswap/libs"
 	bnd "github.com/devwarrior777/atomicswap/libs/protobind"
 	"github.com/devwarrior777/atomicswap/libs/protobind/server/svrcfg"
+	"github.com/devwarrior777/atomicswap/libs/protobind/server/wallets"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -41,8 +43,28 @@ type swapLibServer struct {
 
 // PingWalletRPC pings the wallet node RPC client to establish if the node is running
 func (s *swapLibServer) PingWalletRPC(ctx context.Context, request *bnd.PingWalletRPCRequest) (*bnd.PingWalletRPCResponse, error) {
-	response := pingWalletRPC(request)
 	log.Printf("PingWalletRPC\n")
+	response := &bnd.PingWalletRPCResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// ping wallet
+	err = wallet.PingRPC()
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
 	return response, nil
 }
 
