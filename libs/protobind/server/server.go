@@ -54,7 +54,7 @@ func (s *swapLibServer) PingWalletRPC(ctx context.Context, request *bnd.PingWall
 	rpcinfo.Certs = request.Certs
 	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
 	if err != nil {
-		response.Errorno = bnd.ERRNO_LIBS
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
 		response.Errstr = err.Error()
 		return response, nil
 	}
@@ -69,9 +69,29 @@ func (s *swapLibServer) PingWalletRPC(ctx context.Context, request *bnd.PingWall
 }
 
 func (s *swapLibServer) NewAddress(ctx context.Context, request *bnd.NewAddressRequest) (*bnd.NewAddressResponse, error) {
-	// response := newAddress(request)
-	response := &bnd.NewAddressResponse{}
 	log.Printf("NewAddress\n")
+	response := &bnd.NewAddressResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// get new address
+	address, err := wallet.GetNewAddress()
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.Address = address
 	return response, nil
 }
 
