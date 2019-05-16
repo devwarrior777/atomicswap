@@ -11,6 +11,7 @@ vendor/
 
 # Development binaries
 libs/protobind/server/server
+libs/protobind/server/shutdown/shutdown
 cmd/bchatomicswap/bchatomicswap
 cmd/btcatomicswap/btcatomicswap
 cmd/dcratomicswap/dcratomicswap

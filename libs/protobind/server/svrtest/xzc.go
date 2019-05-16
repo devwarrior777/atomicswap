@@ -13,7 +13,7 @@ func testXZC(testnet bool) error {
 	if testnet {
 		pingreq = xzcTestnetPingWalletRPCRequest
 	}
-	pingresp, err := PingRPC(&pingreq)
+	pingresp, err := pingRPC(&pingreq)
 	if err != nil {
 		s := status.Convert(err)
 		return fmt.Errorf("status: %d - %v - %v", s.Code(), s.Code(), s.Message())
@@ -28,7 +28,7 @@ func testXZC(testnet bool) error {
 	if testnet {
 		newaddressreq = xzcTestnetNewAddressRequest
 	}
-	newaddress, err := NewAddress(&newaddressreq)
+	newaddress, err := newAddress(&newaddressreq)
 	if err != nil {
 		s := status.Convert(err)
 		return fmt.Errorf("status: %d - %v - %v", s.Code(), s.Code(), s.Message())

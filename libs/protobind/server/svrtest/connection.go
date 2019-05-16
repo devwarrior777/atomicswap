@@ -45,8 +45,8 @@ func getClientConnection() (*grpc.ClientConn, error) {
 // API //
 /////////
 
-// PingRPC is for the client to check if the server is running
-func PingRPC(request *bnd.PingWalletRPCRequest) (*bnd.PingWalletRPCResponse, error) {
+// pingRPC is for the client to check if the server is running
+func pingRPC(request *bnd.PingWalletRPCRequest) (*bnd.PingWalletRPCResponse, error) {
 	conn, err := getClientConnection()
 	if err != nil {
 		return nil, err
@@ -62,8 +62,8 @@ func PingRPC(request *bnd.PingWalletRPCRequest) (*bnd.PingWalletRPCResponse, err
 	return response, nil
 }
 
-// NewAddress gets a new address for the Coin & Network
-func NewAddress(request *bnd.NewAddressRequest) (*bnd.NewAddressResponse, error) {
+// newAddress gets a new address for the Coin & Network
+func newAddress(request *bnd.NewAddressRequest) (*bnd.NewAddressResponse, error) {
 	conn, err := getClientConnection()
 	if err != nil {
 		return nil, err
@@ -73,6 +73,108 @@ func NewAddress(request *bnd.NewAddressRequest) (*bnd.NewAddressResponse, error)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	response, err := client.NewAddress(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// initiate gets contract data for the Coin & Network
+func initiate(request *bnd.InitiateRequest) (*bnd.InitiateResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.Initiate(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// participate gets contract data for the Coin & Network
+func participate(request *bnd.ParticipateRequest) (*bnd.ParticipateResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.Participate(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// redeem makes a redeem transaction for the contract, Coin & Network
+func redeem(request *bnd.RedeemRequest) (*bnd.RedeemResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.Redeem(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// refund makes a refund transaction for the contract, Coin & Network
+func refund(request *bnd.RefundRequest) (*bnd.RefundResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.Refund(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// publish broadcasts a transaction for the Coin & Network
+func publish(request *bnd.PublishRequest) (*bnd.PublishResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.Publish(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// gettx get info for a wallet's txid for the Coin & Network
+func gettx(request *bnd.GetTxRequest) (*bnd.GetTxResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.GetTx(ctx, request)
 	if err != nil {
 		return response, err
 	}

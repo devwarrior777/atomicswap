@@ -96,58 +96,235 @@ func (s *swapLibServer) NewAddress(ctx context.Context, request *bnd.NewAddressR
 }
 
 func (s *swapLibServer) Initiate(ctx context.Context, request *bnd.InitiateRequest) (*bnd.InitiateResponse, error) {
-	// response := initiate(request)
-	response := &bnd.InitiateResponse{}
 	log.Printf("Initiate\n")
+	response := &bnd.InitiateResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// initiate
+	params := libs.InitiateParams{}
+	params.SecretHash = request.Secrethash
+	params.CP2Addr = request.PartAddress
+	params.CP2Amount = request.Amount
+	result, err := wallet.Initiate(params)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.Contract = result.Contract
+	response.ContractP2Sh = result.ContractP2SH
+	response.ContractTx = result.ContractTx
+	response.ContractTxHash = result.ContractTxHash
+	response.Fee = result.ContractFee
+	response.Feerate = float32(result.ContractFeePerKb)
+	response.Locktime = result.ContractRefundLocktime
 	return response, nil
 }
 
 func (s *swapLibServer) Participate(ctx context.Context, request *bnd.ParticipateRequest) (*bnd.ParticipateResponse, error) {
-	// response := participate(request)
-	response := &bnd.ParticipateResponse{}
-	log.Printf("Initiate\n")
+	log.Printf("Participate\n")
+	response := &bnd.ParticipateResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// participate
+	params := libs.ParticipateParams{}
+	params.SecretHash = request.Secrethash
+	params.CP1Addr = request.InitAddress
+	params.CP1Amount = request.Amount
+	result, err := wallet.Participate(params)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.Contract = result.Contract
+	response.ContractP2Sh = result.ContractP2SH
+	response.ContractTx = result.ContractTx
+	response.ContractTxHash = result.ContractTxHash
+	response.Fee = result.ContractFee
+	response.Feerate = float32(result.ContractFeePerKb)
+	response.Locktime = result.ContractRefundLocktime
 	return response, nil
 }
 
 func (s *swapLibServer) Redeem(ctx context.Context, request *bnd.RedeemRequest) (*bnd.RedeemResponse, error) {
-	// response := redeem(request)
-	response := &bnd.RedeemResponse{}
 	log.Printf("Redeem\n")
+	response := &bnd.RedeemResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// redeem
+	params := libs.RedeemParams{}
+	params.Secret = request.Secret
+	params.Contract = request.Contract
+	params.ContractTx = request.ContractTx
+	result, err := wallet.Redeem(params)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.RedeemTx = result.RedeemTx
+	response.RedeemTxHash = result.RedeemTxHash
+	response.Fee = result.RedeemFee
+	response.Feerate = float32(result.RedeemFeePerKb)
 	return response, nil
 }
 
 func (s *swapLibServer) Refund(ctx context.Context, request *bnd.RefundRequest) (*bnd.RefundResponse, error) {
-	// response := refund(request)
-	response := &bnd.RefundResponse{}
 	log.Printf("Refund\n")
+	response := &bnd.RefundResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// refund
+	params := libs.RefundParams{}
+	params.Contract = request.Contract
+	params.ContractTx = request.ContractTx
+	result, err := wallet.Refund(params)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.RefundTx = result.RefundTx
+	response.RefundTxHash = result.RefundTxHash
+	response.Fee = result.RefundFee
+	response.Feerate = float32(result.RefundFeePerKb)
 	return response, nil
 }
 
 func (s *swapLibServer) Publish(ctx context.Context, request *bnd.PublishRequest) (*bnd.PublishResponse, error) {
-	// response := publish(request)
-	response := &bnd.PublishResponse{}
 	log.Printf("Publish\n")
+	response := &bnd.PublishResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// publish
+	txhash, err := wallet.Publish(request.Tx)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.TxHash = txhash
 	return response, nil
 }
 
 func (s *swapLibServer) ExtractSecret(ctx context.Context, request *bnd.ExtractSecretRequest) (*bnd.ExtractSecretResponse, error) {
-	// response := extractSecret(request)
-	response := &bnd.ExtractSecretResponse{}
 	log.Printf("ExtractSecret\n")
+	response := &bnd.ExtractSecretResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	log.Printf("Wallet: %v", wallet)
+	//TODO:
 	return response, nil
 }
 
 func (s *swapLibServer) Audit(ctx context.Context, request *bnd.AuditRequest) (*bnd.AuditResponse, error) {
-	// response := audit(request)
-	response := &bnd.AuditResponse{}
 	log.Printf("Audit\n")
+	response := &bnd.AuditResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	log.Printf("Wallet: %v", wallet)
+	//TODO:
 	return response, nil
 }
 
 func (s *swapLibServer) GetTx(ctx context.Context, request *bnd.GetTxRequest) (*bnd.GetTxResponse, error) {
-	// response := getTx(request)
-	response := &bnd.GetTxResponse{}
 	log.Printf("GetTx\n")
+	response := &bnd.GetTxResponse{Errorno: bnd.ERRNO_OK}
+	// get wallet
+	rpcinfo := libs.RPCInfo{}
+	rpcinfo.HostPort = request.Hostport
+	rpcinfo.User = request.Rpcuser
+	rpcinfo.Pass = request.Rpcpass
+	rpcinfo.WalletPass = request.Wpass
+	rpcinfo.Certs = request.Certs
+	wallet, err := wallets.WalletForCoin(request.Testnet, rpcinfo, request.Coin)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_UNSUPPORTED
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	// get tx
+	result, err := wallet.GetTx(request.Txid)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.Confirmations = result.Confirmations
+	response.Blockhash = result.Blockhash
+	response.Blockindex = int32(result.Blockindex)
+	response.Blocktime = result.Blocktime
+	response.Time = result.Time
+	response.TimeReceived = result.TimeReceived
+	response.Hex = result.Hex
 	return response, nil
 }
 

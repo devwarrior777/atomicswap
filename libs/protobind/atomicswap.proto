@@ -124,7 +124,7 @@ message RedeemRequest {
 
 	string secret = 10;	
 	string contract = 11;
-	uint64 contract_tx = 12;
+	string contract_tx = 12;
 }
 
 message RedeemResponse {
@@ -148,7 +148,7 @@ message RefundRequest {
 	string certs = 9;
 
 	string contract = 10;
-	uint64 contract_tx = 11;
+	string contract_tx = 11;
 }
 
 message RefundResponse {
