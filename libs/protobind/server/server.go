@@ -274,8 +274,14 @@ func (s *swapLibServer) ExtractSecret(ctx context.Context, request *bnd.ExtractS
 		response.Errstr = err.Error()
 		return response, nil
 	}
-	log.Printf("Wallet: %v", wallet)
-	//TODO:
+	// extract secret
+	secret, err := wallet.ExtractSecret(request.CpRedemptionTx, request.Secrethash)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.Secret = secret
 	return response, nil
 }
 
@@ -290,8 +296,22 @@ func (s *swapLibServer) Audit(ctx context.Context, request *bnd.AuditRequest) (*
 		response.Errstr = err.Error()
 		return response, nil
 	}
-	log.Printf("Wallet: %v", wallet)
-	//TODO:
+	// audit
+	params := libs.AuditParams{}
+	params.Contract = request.Contract
+	params.ContractTx = request.ContractTx
+	result, err := wallet.AuditContract(params)
+	if err != nil {
+		response.Errorno = bnd.ERRNO_LIBS
+		response.Errstr = err.Error()
+		return response, nil
+	}
+	response.ContractAmount = result.ContractAmount
+	response.ContractAddress = result.ContractAddress
+	response.ContractSecrethash = result.ContractSecretHash
+	response.RecipientAddress = result.ContractRecipientAddress
+	response.RefundAddress = result.ContractRefundAddress
+	response.RefundLocktime = result.ContractRefundLocktime
 	return response, nil
 }
 

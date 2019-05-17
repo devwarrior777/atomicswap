@@ -18,6 +18,7 @@ func testLTC(testnet bool) error {
 	var address string
 	var contract string
 	var contractTx string
+	var redeemTx string
 	var secret string
 	var secretHash string
 
@@ -108,6 +109,28 @@ func testLTC(testnet bool) error {
 	fmt.Printf("Participate fee rate:          %0.08f/kb\n", participate.Feerate)
 	fmt.Printf("Participate refund locktime:   %d\n", participate.Locktime)
 
+	// audit
+	auditreq := ltcAuditRequest
+	if testnet {
+		auditreq = ltcTestnetAuditRequest
+	}
+	auditreq.Contract = contract
+	auditreq.ContractTx = contractTx
+	audit, err := audit(&auditreq)
+	if err != nil {
+		s := status.Convert(err)
+		return fmt.Errorf("status: %d - %v - %v", s.Code(), s.Code(), s.Message())
+	}
+	if audit.Errorno != bnd.ERRNO_OK {
+		return fmt.Errorf("%v %s", audit.Errorno, audit.Errstr)
+	}
+	fmt.Printf("Audit contract amount:         %d\n", audit.ContractAmount)
+	fmt.Printf("Audit contract address:        %s\n", audit.ContractAddress)
+	fmt.Printf("Audit contract secret hash:    %s\n", audit.ContractSecrethash)
+	fmt.Printf("Audit recipient address:       %s\n", audit.RecipientAddress)
+	fmt.Printf("Audit refund address:          %s\n", audit.RefundAddress)
+	fmt.Printf("Audit refund locktime:         %d\n", audit.RefundLocktime)
+
 	// redeem
 	redeemreq := ltcRedeemRequest
 	if testnet {
@@ -124,13 +147,31 @@ func testLTC(testnet bool) error {
 	if redeem.Errorno != bnd.ERRNO_OK {
 		return fmt.Errorf("%v %s", redeem.Errorno, redeem.Errstr)
 	}
-	if len(redeem.RedeemTx) < 64 {
+	redeemTx = redeem.RedeemTx
+	if len(redeemTx) < 64 {
 		return errors.New("invalid contract/contract-tx length(s)")
 	}
-	fmt.Printf("Redeem contract:               %s...\n", redeem.RedeemTx[:64])
+	fmt.Printf("Redeem contract:               %s...\n", redeemTx[:64])
 	fmt.Printf("Redeem contract tx:            %s...\n", redeem.RedeemTxHash)
 	fmt.Printf("Redeem fee:                    %d\n", redeem.Fee)
 	fmt.Printf("Redeem fee rate:               %0.08f/kb\n", redeem.Feerate)
+
+	// extractSecret
+	extractsecretreq := ltcExtractSecretRequest
+	if testnet {
+		extractsecretreq = ltcTestnetExtractSecretRequest
+	}
+	extractsecretreq.CpRedemptionTx = redeemTx
+	extractsecretreq.Secrethash = secretHash
+	extract, err := extractSecret(&extractsecretreq)
+	if err != nil {
+		s := status.Convert(err)
+		return fmt.Errorf("status: %d - %v - %v", s.Code(), s.Code(), s.Message())
+	}
+	if extract.Errorno != bnd.ERRNO_OK {
+		return fmt.Errorf("%v %s", extract.Errorno, extract.Errstr)
+	}
+	fmt.Printf("ExtractSecret secret:          %s\n", extract.Secret)
 
 	// refund
 	refundreq := ltcRefundRequest
@@ -150,8 +191,8 @@ func testLTC(testnet bool) error {
 	if len(refund.RefundTx) < 64 {
 		return errors.New("invalid contract/contract-tx length(s)")
 	}
-	fmt.Printf("Refund contract:               %s...\n", refund.RefundTx[:64])
-	fmt.Printf("Refund contract tx:            %s...\n", refund.RefundTxHash)
+	fmt.Printf("Refund tx:                     %s...\n", refund.RefundTx[:64])
+	fmt.Printf("Refund tx hash:                %s...\n", refund.RefundTxHash)
 	fmt.Printf("Refund fee:                    %d\n", refund.Fee)
 	fmt.Printf("Refund fee rate:               %0.08f/kb\n", refund.Feerate)
 

@@ -201,7 +201,7 @@ message AuditRequest {
 	bool testnet = 2;
 
 	string contract = 5;
-	uint64 contract_tx = 6;
+	string contract_tx = 6;
 }
 
 message AuditResponse {
@@ -210,7 +210,7 @@ message AuditResponse {
 	string contract_secrethash = 7;
 	string recipient_address = 8;
 	string refund_address = 9;
-	uint64 refund_locktime = 10;
+	int64 refund_locktime = 10;
 
 	ERRNO errorno = 14;
 	string errstr = 15;

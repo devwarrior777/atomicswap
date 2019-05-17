@@ -9,7 +9,7 @@ TEST DATA FOR THE LTC WALLET RPC COMMANDS
 
 You will need your own testdata that reflects your coins configurations:
  - Testnet or not
- - RPC Info to connect to your RPC wallet node(s)
+ - RPC Info to connect to your LTC RPC wallet node(s)
 */
 
 var ltcPingWalletRPCRequest = bnd.PingWalletRPCRequest{
@@ -134,6 +134,26 @@ var ltcTestnetRefundRequest = bnd.RefundRequest{
 	Rpcpass:  "dev",
 	Wpass:    "123",
 	Certs:    "",
+}
+
+var ltcExtractSecretRequest = bnd.ExtractSecretRequest{
+	Coin:    bnd.COIN_LTC,
+	Testnet: false,
+}
+
+var ltcTestnetExtractSecretRequest = bnd.ExtractSecretRequest{
+	Coin:    bnd.COIN_LTC,
+	Testnet: true,
+}
+
+var ltcAuditRequest = bnd.AuditRequest{
+	Coin:    bnd.COIN_LTC,
+	Testnet: false,
+}
+
+var ltcTestnetAuditRequest = bnd.AuditRequest{
+	Coin:    bnd.COIN_LTC,
+	Testnet: true,
 }
 
 var ltcPublishRequest = bnd.PublishRequest{

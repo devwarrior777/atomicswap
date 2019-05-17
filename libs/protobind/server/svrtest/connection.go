@@ -147,6 +147,40 @@ func refund(request *bnd.RefundRequest) (*bnd.RefundResponse, error) {
 	return response, nil
 }
 
+// extractSecret gets secret embedded in the initiator redeem tx scriptsig
+func extractSecret(request *bnd.ExtractSecretRequest) (*bnd.ExtractSecretResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.ExtractSecret(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// audit gets info embedded in the contract
+func audit(request *bnd.AuditRequest) (*bnd.AuditResponse, error) {
+	conn, err := getClientConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	client := bnd.NewSwapLibClient(conn)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	response, err := client.Audit(ctx, request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // publish broadcasts a transaction for the Coin & Network
 func publish(request *bnd.PublishRequest) (*bnd.PublishResponse, error) {
 	conn, err := getClientConnection()
