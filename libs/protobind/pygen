@@ -1,1 +1,4 @@
-protoc --python_out=./python atomicswap.proto
+###protoc --python_out=./python  atomicswap.proto
+
+###pip install grpcio-tools
+python -m grpc_tools.protoc --python_out=./python --grpc_python_out=./python  -I. atomicswap.proto

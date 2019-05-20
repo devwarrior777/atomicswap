@@ -43,7 +43,7 @@ message NewAddressRequest {
 	COIN coin = 1;
 	bool testnet = 2;
 
-	string hostport = 5;	// default localhost
+	string hostport = 5;
 	string rpcuser = 6;
 	string rpcpass = 7;
 	string wpass = 8;
